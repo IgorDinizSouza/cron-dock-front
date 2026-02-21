@@ -1,0 +1,298 @@
+@import "tailwindcss";
+@import "tw-animate-css";
+
+@custom-variant dark (&:is(.dark *));
+
+:root {
+  /* Atualizando tokens de design conforme brief para sistema odontológico avançado */
+  --background: #ffffff;
+  --foreground: #374151;
+  --card: #f1f5f9;
+  --card-foreground: #475569;
+  --popover: #ffffff;
+  --popover-foreground: #374151;
+  --primary: #059669;
+  --primary-foreground: #ffffff;
+  --secondary: #475569;
+  --secondary-foreground: #ffffff;
+  --muted: #f1f5f9;
+  --muted-foreground: #374151;
+  --accent: #10b981;
+  --accent-foreground: #ffffff;
+  --destructive: #ea580c;
+  --destructive-foreground: #ffffff;
+  --border: #d1d5db;
+  --input: #ffffff;
+  --ring: rgba(5, 150, 105, 0.5);
+  --chart-1: #84cc16;
+  --chart-2: #f97316;
+  --chart-3: #ea580c;
+  --chart-4: #059669;
+  --chart-5: #15803d;
+  --radius: 0.5rem;
+  --sidebar: #f1f5f9;
+  --sidebar-foreground: #374151;
+  --sidebar-primary: #059669;
+  --sidebar-primary-foreground: #ffffff;
+  --sidebar-accent: #10b981;
+  --sidebar-accent-foreground: #ffffff;
+  --sidebar-border: #d1d5db;
+  --sidebar-ring: rgba(5, 150, 105, 0.5);
+
+  /* Adicionando tokens específicos para funcionalidades odontológicas */
+  --dental-primary: #059669;
+  --dental-accent: #10b981;
+  --dental-success: #15803d;
+  --dental-warning: #f97316;
+  --dental-danger: #ea580c;
+  --dental-tooth-healthy: #ffffff;
+  --dental-tooth-cavity: #dc2626;
+  --dental-tooth-filled: #6366f1;
+  --dental-tooth-crown: #fbbf24;
+  --dental-tooth-root: #8b5cf6;
+  --dental-tooth-missing: #6b7280;
+
+  /* Atualizando variável de fonte para Open Sans */
+  --font-open-sans: "Open Sans", sans-serif;
+}
+
+.dark {
+  --background: #111827;
+  --foreground: #f9fafb;
+  --card: #1f2937;
+  --card-foreground: #f3f4f6;
+  --popover: #111827;
+  --popover-foreground: #f9fafb;
+  --primary: #10b981;
+  --primary-foreground: #ffffff;
+  --secondary: #374151;
+  --secondary-foreground: #f9fafb;
+  --muted: #1f2937;
+  --muted-foreground: #9ca3af;
+  --accent: #059669;
+  --accent-foreground: #ffffff;
+  --destructive: #f97316;
+  --destructive-foreground: #ffffff;
+  --border: #374151;
+  --input: #1f2937;
+  --ring: rgba(16, 185, 129, 0.5);
+  --chart-1: #84cc16;
+  --chart-2: #f97316;
+  --chart-3: #ea580c;
+  --chart-4: #10b981;
+  --chart-5: #059669;
+  --sidebar: #1f2937;
+  --sidebar-foreground: #f3f4f6;
+  --sidebar-primary: #10b981;
+  --sidebar-primary-foreground: #ffffff;
+  --sidebar-accent: #059669;
+  --sidebar-accent-foreground: #ffffff;
+  --sidebar-border: #374151;
+  --sidebar-ring: rgba(16, 185, 129, 0.5);
+
+  /* Tokens para modo escuro das funcionalidades odontológicas */
+  --dental-primary: #10b981;
+  --dental-accent: #059669;
+  --dental-success: #22c55e;
+  --dental-warning: #f59e0b;
+  --dental-danger: #f97316;
+  --dental-tooth-healthy: #f9fafb;
+  --dental-tooth-cavity: #ef4444;
+  --dental-tooth-filled: #8b5cf6;
+  --dental-tooth-crown: #f59e0b;
+  --dental-tooth-root: #a855f7;
+  --dental-tooth-missing: #9ca3af;
+}
+
+@theme inline {
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  --color-card: var(--card);
+  --color-card-foreground: var(--card-foreground);
+  --color-popover: var(--popover);
+  --color-popover-foreground: var(--popover-foreground);
+  --color-primary: var(--primary);
+  --color-primary-foreground: var(--primary-foreground);
+  --color-secondary: var(--secondary);
+  --color-secondary-foreground: var(--secondary-foreground);
+  --color-muted: var(--muted);
+  --color-muted-foreground: var(--muted-foreground);
+  --color-accent: var(--accent);
+  --color-accent-foreground: var(--accent-foreground);
+  --color-destructive: var(--destructive);
+  --color-destructive-foreground: var(--destructive-foreground);
+  --color-border: var(--border);
+  --color-input: var(--input);
+  --color-ring: var(--ring);
+  --color-chart-1: var(--chart-1);
+  --color-chart-2: var(--chart-2);
+  --color-chart-3: var(--chart-3);
+  --color-chart-4: var(--chart-4);
+  --color-chart-5: var(--chart-5);
+  --radius-sm: calc(var(--radius) - 4px);
+  --radius-md: calc(var(--radius) - 2px);
+  --radius-lg: var(--radius);
+  --radius-xl: calc(var(--radius) + 4px);
+  --color-sidebar: var(--sidebar);
+  --color-sidebar-foreground: var(--sidebar-foreground);
+  --color-sidebar-primary: var(--sidebar-primary);
+  --color-sidebar-primary-foreground: var(--sidebar-primary-foreground);
+  --color-sidebar-accent: var(--sidebar-accent);
+  --color-sidebar-accent-foreground: var(--sidebar-accent-foreground);
+  --color-sidebar-border: var(--sidebar-border);
+  --color-sidebar-ring: var(--sidebar-ring);
+  /* Configurando Open Sans como fonte principal para sans e serif */
+  --font-sans: var(--font-open-sans);
+  --font-serif: var(--font-open-sans);
+
+  --brand-orange: #e56f25; /* laranja extraído do logotipo CronDock */
+  --brand-blue: #0b66c2;  /* azul para o hover */
+}
+
+/* Atualizando classes customizadas com novos tokens */
+.dental-primary {
+  background-color: var(--dental-primary);
+  color: var(--primary-foreground);
+}
+
+.btn-primary-custom {
+  background-color: #f97316; /* laranja */
+  color: #ffffff;
+  transition: background-color 0.2s;
+}
+
+.btn-primary-custom:hover {
+  background-color: #0B66C2; /* azul */
+}
+
+.dental-accent {
+  background-color: var(--dental-accent);
+  color: var(--accent-foreground);
+}
+
+.dental-card {
+  background-color: var(--card);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.1), 0 1px 2px 0 rgba(0, 0, 0, 0.06);
+}
+
+/* Adicionando classes específicas para odontograma */
+.tooth-healthy {
+  fill: var(--dental-tooth-healthy);
+  stroke: var(--border);
+  stroke-width: 1;
+}
+
+.tooth-cavity {
+  fill: var(--dental-tooth-cavity);
+  stroke: var(--border);
+  stroke-width: 1;
+}
+
+.tooth-filled {
+  fill: var(--dental-tooth-filled);
+  stroke: var(--border);
+  stroke-width: 1;
+}
+
+.tooth-crown {
+  fill: var(--dental-tooth-crown);
+  stroke: var(--border);
+  stroke-width: 1;
+}
+
+.tooth-root {
+  fill: var(--dental-tooth-root);
+  stroke: var(--border);
+  stroke-width: 1;
+}
+
+.tooth-missing {
+  fill: var(--dental-tooth-missing);
+  stroke: var(--border);
+  stroke-width: 2;
+  stroke-dasharray: 5, 5;
+}
+
+.tooth-hover {
+  filter: brightness(1.1);
+  cursor: pointer;
+  transition: filter 0.2s ease;
+}
+
+/* Classes para sistema financeiro */
+.financial-positive {
+  color: var(--dental-success);
+}
+
+.financial-negative {
+  color: var(--dental-danger);
+}
+
+.financial-neutral {
+  color: var(--muted-foreground);
+}
+
+/* Classes para orçamentos */
+.budget-item {
+  background-color: var(--card);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 1rem;
+  margin-bottom: 0.5rem;
+  transition: all 0.2s ease;
+}
+
+.budget-item:hover {
+  border-color: var(--dental-primary);
+  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+}
+
+.budget-item.dragging {
+  opacity: 0.5;
+  transform: rotate(5deg);
+}
+
+@layer base {
+  * {
+    @apply border-border outline-ring/50;
+  }
+  body {
+    @apply bg-background text-foreground;
+    /* Aplicando Open Sans como fonte principal do corpo */
+    font-family: var(--font-open-sans);
+  }
+  h1,
+  h2,
+  h3,
+  h4,
+  h5,
+  h6 {
+    /* Aplicando Open Sans para títulos com peso semibold */
+    font-family: var(--font-open-sans);
+    font-weight: 600;
+  }
+}
+
+@media print {
+  .no-print {
+    display: none !important;
+  }
+  .dental-card {
+    box-shadow: none !important;
+    border: 1px solid #e5e7eb !important;
+  }
+  html,
+  body {
+    background: #fff !important;
+  }
+  .tooth-healthy,
+  .tooth-cavity,
+  .tooth-filled,
+  .tooth-crown,
+  .tooth-root,
+  .tooth-missing {
+    stroke: #000 !important;
+  }
+}
