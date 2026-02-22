@@ -13,10 +13,10 @@ const navigation = [
   { name: "Grupo empresarial", href: "/grupos-empresariais", icon: Building },
   { name: "Pedidos", href: "/pedidos", icon: ShoppingCart },
   { name: "Agendamentos", href: "/agendamentos", icon: Calendar },
-  { name: "Usuarios", href: "/usuarios", icon: UsersIcon },
+  { name: "Usuários", href: "/usuarios", icon: UsersIcon },
   { name: "Perfis", href: "/perfis", icon: Shield },
   { name: "Roles", href: "/roles", icon: KeyRound },
-  { name: "Configuracoes", href: "/configuracoes", icon: Settings },
+  { name: "Configurações", href: "/configuracoes", icon: Settings },
 ];
 
 function getInitials(fullName?: string) {

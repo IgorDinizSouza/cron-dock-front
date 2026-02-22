@@ -182,7 +182,7 @@ export default function UsuariosPage() {
 
       <Card>
         <CardHeader>
-          <CardTitle>Usuarios ({filtered.length})</CardTitle>
+          <CardTitle>Usuários ({filtered.length})</CardTitle>
         </CardHeader>
         <CardContent>
           {loading ? (

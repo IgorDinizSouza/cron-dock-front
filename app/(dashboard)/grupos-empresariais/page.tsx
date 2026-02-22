@@ -25,7 +25,6 @@ export default function GrupoEmpresaPage() {
     setLoading(true)
     try {
       const data = await grupoEmpresarialApi.list(term || "")
-
       setItems(data || [])
     } catch (e: any) {
       toast({
@@ -40,10 +39,8 @@ export default function GrupoEmpresaPage() {
 
   useEffect(() => {
     load("")
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [])
 
-  // filtra localmente pelos campos de filtro
   const filtered = useMemo(() => {
     const cCodigo = codigoFilter.trim().toLowerCase()
     const cDesc = descricaoFilter.trim().toLowerCase()
@@ -54,8 +51,8 @@ export default function GrupoEmpresaPage() {
 
     return items.filter((x) => {
       const matchesCodigo = cCodigo ? (x.id?.toString() || "").toLowerCase().includes(cCodigo) : true
-      const matchesDesc = cDesc ? ((x.descricao || "").toLowerCase().includes(cDesc)) : true
-      const matchesCnpj = cCnpj ? ((x.cnpj || "").toLowerCase().includes(cCnpj)) : true
+      const matchesDesc = cDesc ? (x.descricao || "").toLowerCase().includes(cDesc) : true
+      const matchesCnpj = cCnpj ? (x.cnpj || "").toLowerCase().includes(cCnpj) : true
       const ativoText = x.ativo ? "ativo" : "inativo"
       const matchesAtivo = cAtivo ? ativoText.includes(cAtivo) : true
 
@@ -67,36 +64,35 @@ export default function GrupoEmpresaPage() {
 
   return (
     <div className="space-y-6">
-      <div className="flex items-start justify-between gap-4 flex-col sm:flex-row">
+      <div className="flex flex-col items-start justify-between gap-4 sm:flex-row">
         <div>
           <h1 className="text-2xl font-bold text-gray-900">Grupo Empresarial</h1>
           <p className="text-gray-600">Cadastro e gerenciamento de grupos</p>
         </div>
-
         <div />
       </div>
 
       <Card>
         <CardHeader className="space-y-3">
-
-          <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
-            <div className="grid grid-cols-1 sm:grid-cols-4 gap-2 w-full">
+          <CardTitle>Filtros</CardTitle>
+          <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+            <div className="grid w-full grid-cols-1 gap-2 sm:grid-cols-4">
               <Input
-                className="pl-3 shadow-sm border-gray-200 bg-white h-10 placeholder:font-italic"
+                className="h-10 border-gray-200 bg-white pl-3 shadow-sm"
                 value={codigoFilter}
                 onChange={(e) => setCodigoFilter(e.target.value)}
-                placeholder="Código"
+                placeholder="Codigo"
                 disabled={loading}
               />
               <Input
-                className="pl-3 shadow-sm border-gray-200 bg-white h-10 placeholder:font-italic"
+                className="h-10 border-gray-200 bg-white pl-3 shadow-sm"
                 value={descricaoFilter}
                 onChange={(e) => setDescricaoFilter(e.target.value)}
-                placeholder="Descrição"
+                placeholder="Descricao"
                 disabled={loading}
               />
               <Input
-                className="pl-3 shadow-sm border-gray-200 bg-white h-10 placeholder:font-italic"
+                className="h-10 border-gray-200 bg-white pl-3 shadow-sm"
                 value={cnpjFilter}
                 onChange={(e) => setCnpjFilter(e.target.value)}
                 placeholder="CNPJ"
@@ -106,7 +102,7 @@ export default function GrupoEmpresaPage() {
                 <select
                   value={ativoFilter}
                   onChange={(e) => setAtivoFilter(e.target.value)}
-                  className="border-input rounded-md px-2 py-2 bg-white w-full h-10 shadow-sm border-gray-200"
+                  className="border-input h-10 w-full rounded-md border border-gray-200 bg-white px-2 py-2 shadow-sm"
                   disabled={loading}
                 >
                   <option value="">Todos</option>
@@ -118,7 +114,7 @@ export default function GrupoEmpresaPage() {
 
             <div className="flex items-center gap-2">
               <Button onClick={() => load()} disabled={loading} className="btn-primary-custom">
-                <Search className="h-4 w-4 mr-2" />
+                <Search className="mr-2 h-4 w-4" />
                 Buscar
               </Button>
               <Button
@@ -130,31 +126,39 @@ export default function GrupoEmpresaPage() {
                 }}
                 className="btn-primary-custom"
               >
-                <Eraser className="h-4 w-4 mr-2" />
+                <Eraser className="mr-2 h-4 w-4" />
                 Limpar
               </Button>
 
               <Link href="/grupos-empresariais/novo">
                 <Button className="btn-primary-custom">
-                  <Plus className="h-4 w-4 mr-2" />
+                  <Plus className="mr-2 h-4 w-4" />
                   Novo
                 </Button>
               </Link>
             </div>
           </div>
         </CardHeader>
+        <CardContent>
+          <div className="text-sm text-gray-500">Use os filtros acima para localizar os grupos empresariais.</div>
+        </CardContent>
+      </Card>
 
+      <Card>
+        <CardHeader>
+          <CardTitle>Grupo Empresarial ({filtered.length})</CardTitle>
+        </CardHeader>
         <CardContent>
           {loading ? (
-            <div className="text-gray-500 py-10 text-center">Carregando...</div>
+            <div className="py-10 text-center text-gray-500">Carregando...</div>
           ) : filtered.length === 0 ? (
-            <div className="text-gray-500 py-10 text-center">Nenhum grupo cadastrado.</div>
+            <div className="py-10 text-center text-gray-500">Nenhum grupo cadastrado.</div>
           ) : (
             <div className="overflow-x-auto">
               <table className="w-full text-sm">
                 <thead>
-                  <tr className="text-left border-b">
-                    <th className="py-3 pr-4">Código</th>
+                  <tr className="border-b text-left">
+                    <th className="py-3 pr-4">Codigo</th>
                     <th className="py-3 pr-4">Descrição</th>
                     <th className="py-3 pr-4">CNPJ</th>
                     <th className="py-3 pr-4">Ativo</th>
@@ -164,12 +168,12 @@ export default function GrupoEmpresaPage() {
                 <tbody>
                   {filtered.map((g) => (
                     <tr key={g.id} className="border-b last:border-b-0">
-                      <td className="py-3 pr-4 whitespace-nowrap">{g.id}</td>
-                      <td className="py-3 pr-4 min-w-[260px]">{g.descricao}</td>
-                      <td className="py-3 pr-4 whitespace-nowrap">{g.cnpj}</td>
+                      <td className="whitespace-nowrap py-3 pr-4">{g.id}</td>
+                      <td className="min-w-[260px] py-3 pr-4">{g.descricao}</td>
+                      <td className="whitespace-nowrap py-3 pr-4">{g.cnpj}</td>
                       <td className="py-3 pr-4">
                         <span
-                          className={`inline-flex items-center px-2 py-1 rounded-md text-xs font-medium ${
+                          className={`inline-flex items-center rounded-md px-2 py-1 text-xs font-medium ${
                             g.ativo ? "bg-green-100 text-green-800" : "bg-gray-100 text-gray-700"
                           }`}
                         >
@@ -179,7 +183,7 @@ export default function GrupoEmpresaPage() {
                       <td className="py-3 text-right">
                         <Link href={`/grupos-empresariais/${g.id}`}>
                           <Button variant="outline" size="sm" className="btn-primary-custom">
-                            <Pencil className="h-4 w-4 mr-2" />
+                            <Pencil className="mr-2 h-4 w-4" />
                             Editar
                           </Button>
                         </Link>
@@ -195,3 +199,4 @@ export default function GrupoEmpresaPage() {
     </div>
   )
 }
+

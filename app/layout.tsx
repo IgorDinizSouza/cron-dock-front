@@ -3,7 +3,6 @@ import type { Metadata } from "next"
 import { Open_Sans } from "next/font/google"
 import "./globals.css"
 import { NotificationProvider } from "@/contexts/notification-context"
-import { QuickActionsBot } from "@/components/bot/quick-actions-bot"
 import { AuthProvider } from "@/contexts/auth-context"
 
 const openSans = Open_Sans({
@@ -31,8 +30,6 @@ export default function RootLayout({
           <AuthProvider>
               {children}
           </AuthProvider>
-         
-          <QuickActionsBot />
         </NotificationProvider>
       </body>
     </html>
