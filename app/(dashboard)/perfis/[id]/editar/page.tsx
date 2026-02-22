@@ -5,14 +5,15 @@ import type React from "react"
 import Link from "next/link"
 import { useEffect, useMemo, useState } from "react"
 import { useParams, useRouter } from "next/navigation"
-import { ArrowLeft, Loader2, Save, X } from "lucide-react"
+import { ArrowLeft, Loader2, Save } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Checkbox } from "@/components/ui/checkbox"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { useToast } from "@/hooks/use-toast"
-import { perfilApi, roleApi, type PerfilResponse, type RoleResponse } from "@/lib/perfil"
+import { perfilApi, roleApi, type RoleResponse } from "@/lib/perfil"
 
 type FormState = {
   descricao: string
@@ -128,55 +129,80 @@ export default function EditarPerfilPage() {
 
   return (
     <div className="space-y-6">
-      <div className="flex items-center gap-4">
-        <Link href="/perfis">
-          <Button variant="ghost" size="sm">
-            <ArrowLeft className="h-4 w-4 mr-2" />
-            Voltar
-          </Button>
-        </Link>
-        <div>
-          <h1 className="text-2xl font-bold text-gray-900">Editar perfil</h1>
-          <p className="text-gray-600">Atualize a descricao e as roles vinculadas</p>
+      <div className="flex flex-col items-start justify-between gap-4 sm:flex-row">
+        <div className="flex items-center gap-4">
+          <Link href="/perfis">
+            <Button size="sm" className="btn-primary-custom">
+              <ArrowLeft className="mr-2 h-4 w-4" />
+              Voltar
+            </Button>
+          </Link>
+          <div>
+            <h1 className="text-2xl font-bold text-gray-900">Editar perfil</h1>
+            <p className="text-gray-600">Atualize a descrição e as roles vinculadas</p>
+          </div>
         </div>
+        <div />
       </div>
 
       <form onSubmit={handleSubmit}>
         <Card>
-          <CardHeader>
+          <CardHeader className="space-y-1">
             <CardTitle>Dados do perfil</CardTitle>
           </CardHeader>
           <CardContent className="space-y-5">
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
               <div>
-                <Label htmlFor="descricao">Descricao *</Label>
-                <Input id="descricao" value={formData.descricao} onChange={(e) => setFormData((prev) => ({ ...prev, descricao: e.target.value }))} />
+                <Label htmlFor="descricao">Descrição *</Label>
+                <Input
+                  id="descricao"
+                  value={formData.descricao}
+                  onChange={(e) => setFormData((prev) => ({ ...prev, descricao: e.target.value }))}
+                  className="h-10 border-gray-200 bg-white shadow-sm"
+                />
               </div>
               <div>
                 <Label htmlFor="ativo">Status</Label>
-                <select
-                  id="ativo"
-                  value={formData.ativo ? "true" : "false"}
-                  onChange={(e) => setFormData((prev) => ({ ...prev, ativo: e.target.value === "true" }))}
-                  className="border-input rounded-md px-3 py-2 bg-white w-full h-10"
-                >
-                  <option value="true">Ativo</option>
-                  <option value="false">Inativo</option>
-                </select>
+                <Select value={formData.ativo ? "true" : "false"} onValueChange={(value) => setFormData((prev) => ({ ...prev, ativo: value === "true" }))}>
+                  <SelectTrigger
+                    id="ativo"
+                    className="h-10 border-orange-200 bg-white shadow-sm focus:border-orange-400 focus:ring-orange-500"
+                  >
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem
+                      value="true"
+                      className="focus:bg-orange-50 focus:text-orange-700 data-[highlighted]:bg-orange-50 data-[highlighted]:text-orange-700"
+                    >
+                      Ativo
+                    </SelectItem>
+                    <SelectItem
+                      value="false"
+                      className="focus:bg-orange-50 focus:text-orange-700 data-[highlighted]:bg-orange-50 data-[highlighted]:text-orange-700"
+                    >
+                      Inativo
+                    </SelectItem>
+                  </SelectContent>
+                </Select>
               </div>
             </div>
 
             <div>
               <Label>Roles</Label>
               {roles.length === 0 ? (
-                <p className="text-sm text-gray-500 mt-2">Nenhuma role cadastrada.</p>
+                <p className="mt-2 text-sm text-gray-500">Nenhuma role cadastrada.</p>
               ) : (
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-3 mt-2 border rounded-lg p-4">
+                <div className="mt-2 grid grid-cols-1 gap-3 rounded-lg border p-4 md:grid-cols-2">
                   {roles.map((role) => {
                     const checked = formData.selectedRoleIds.includes(role.id)
                     return (
-                      <label key={role.id} className="flex items-start gap-3 cursor-pointer">
-                        <Checkbox checked={checked} onCheckedChange={(value) => toggleRole(role.id, value === true)} />
+                      <label key={role.id} className="flex cursor-pointer items-start gap-3">
+                        <Checkbox
+                          checked={checked}
+                          onCheckedChange={(value) => toggleRole(role.id, value === true)}
+                          className="data-[state=checked]:bg-orange-500 data-[state=checked]:border-orange-500 data-[state=checked]:text-white"
+                        />
                         <span>
                           <span className="text-sm font-medium text-gray-900">{role.nome}</span>
                           {role.descricao ? <span className="block text-xs text-gray-500">{role.descricao}</span> : null}
@@ -191,15 +217,9 @@ export default function EditarPerfilPage() {
         </Card>
 
         <div className="flex justify-end gap-4 pt-6">
-          <Link href="/perfis">
-            <Button type="button" variant="outline" disabled={loading}>
-              <X className="h-4 w-4 mr-2" />
-              Cancelar
-            </Button>
-          </Link>
-          <Button type="submit" className="dental-primary" disabled={loading || !hasChanges}>
-            {loading ? <Loader2 className="h-4 w-4 mr-2 animate-spin" /> : <Save className="h-4 w-4 mr-2" />}
-            Salvar alteracoes
+          <Button type="submit" className="btn-primary-custom" disabled={loading || !hasChanges}>
+            {loading ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <Save className="mr-2 h-4 w-4" />}
+            Salvar alterações
           </Button>
         </div>
       </form>

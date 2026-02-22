@@ -9,11 +9,11 @@ import { cn } from "@/lib/utils"
 
 export default function DashboardLayout({ children }: { children: ReactNode }) {
   return (
-    //<AuthGate>
+    <AuthGate>
       <SidebarProvider>
         <DashboardShell>{children}</DashboardShell>
       </SidebarProvider>
-    //<AuthGate>
+    </AuthGate>
   )
 }
 

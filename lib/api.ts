@@ -32,6 +32,7 @@ async function apiRequest<T>(endpoint: string, options: ApiRequestInit = {}): Pr
     ...options,
     method,
     headers,
+    credentials: options.credentials ?? "include",
   }
 
   if (method === "GET" && config.cache === undefined) {
@@ -748,6 +749,7 @@ export const consultoriosApi = {
     const token = typeof window !== "undefined" ? localStorage.getItem("authToken") : null
     const res = await fetch(`${API_BASE_URL}/consultorios/me/logo`, {
       method: "PUT",
+      credentials: "include",
       headers: {
         Accept: "application/json",
         ...(token && { Authorization: `Bearer ${token}` }),
@@ -762,6 +764,7 @@ export const consultoriosApi = {
     const token = typeof window !== "undefined" ? localStorage.getItem("authToken") : null
     const res = await fetch(`${API_BASE_URL}/consultorios/me/logo`, {
       method: "DELETE",
+      credentials: "include",
       headers: {
         Accept: "application/json",
         ...(token && { Authorization: `Bearer ${token}` }),
@@ -775,6 +778,7 @@ export const consultoriosApi = {
     const token = typeof window !== "undefined" ? localStorage.getItem("authToken") : null
     const res = await fetch(`${API_BASE_URL}/consultorios/${consultorioId}/logo`, {
       method: "GET",
+      credentials: "include",
       headers: {
         ...(token && { Authorization: `Bearer ${token}` }),
       },

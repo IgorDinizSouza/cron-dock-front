@@ -42,7 +42,7 @@ export function ReferralSection({ pacienteId, patientName }: { pacienteId: strin
     urgencia: "media",
     dentistaNome: "",
     dentistaCro: "",
-    clinicaNome: "Conect Odonto",
+    clinicaNome: "Cron Dock",
     laboratorio: "",
   })
 
@@ -86,7 +86,7 @@ export function ReferralSection({ pacienteId, patientName }: { pacienteId: strin
       urgencia: newReferral.urgencia || "media",
       dentistaNome: newReferral.dentistaNome || "",
       dentistaCro: newReferral.dentistaCro || "",
-      clinicaNome: newReferral.clinicaNome || "Conect Odonto",
+      clinicaNome: newReferral.clinicaNome || "Cron Dock",
       laboratorio: newReferral.laboratorio || "",
     }
 
@@ -101,7 +101,7 @@ export function ReferralSection({ pacienteId, patientName }: { pacienteId: strin
       urgencia: "media",
       dentistaNome: "",
       dentistaCro: "",
-      clinicaNome: "Conect Odonto",
+      clinicaNome: "Cron Dock",
       laboratorio: "",
     })
     setShowForm(false)

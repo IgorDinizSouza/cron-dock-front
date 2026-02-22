@@ -6,9 +6,11 @@ import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Input } from "@/components/ui/input"
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { useToast } from "@/hooks/use-toast"
 import { usuariosApi, type UsuarioResponse } from "@/lib/usuarios"
-import { Edit, Plus, Search, Trash2, UserCheck, UserX } from "lucide-react"
+import { perfilApi, type PerfilResponse } from "@/lib/perfil"
+import { Edit, Eraser, Plus, Search, Trash2 } from "lucide-react"
 
 function formatDateBR(input?: string | number | null): string {
   if (input == null || input === "") return "-"
@@ -28,8 +30,11 @@ function getPerfilLabel(user: UsuarioResponse): string {
 export default function UsuariosPage() {
   const { toast } = useToast()
   const [items, setItems] = useState<UsuarioResponse[]>([])
+  const [perfis, setPerfis] = useState<PerfilResponse[]>([])
   const [loading, setLoading] = useState(true)
-  const [search, setSearch] = useState("")
+  const [nomeFilter, setNomeFilter] = useState("")
+  const [emailFilter, setEmailFilter] = useState("")
+  const [perfilFilter, setPerfilFilter] = useState("")
 
   const load = async () => {
     try {
@@ -49,35 +54,34 @@ export default function UsuariosPage() {
 
   useEffect(() => {
     load()
+    ;(async () => {
+      try {
+        setPerfis(await perfilApi.listAll())
+      } catch {
+        setPerfis([])
+      }
+    })()
   }, [])
 
   const filtered = useMemo(() => {
-    const term = search.trim().toLowerCase()
-    if (!term) return items
-    return items.filter((user) => {
-      return [user.nome, user.email, getPerfilLabel(user)].join(" ").toLowerCase().includes(term)
-    })
-  }, [items, search])
+    const nome = nomeFilter.trim().toLowerCase()
+    const email = emailFilter.trim().toLowerCase()
+    const perfil = perfilFilter.trim().toLowerCase()
 
-  const toggleStatus = async (user: UsuarioResponse) => {
-    try {
-      await usuariosApi.toggleStatus(user.id, !Boolean(user.ativo))
-      toast({
-        title: "Sucesso",
-        description: !user.ativo ? "Usuário ativado com sucesso." : "Usuário inativado com sucesso.",
-      })
-      await load()
-    } catch (error: any) {
-      toast({
-        title: "Erro",
-        description: error?.message || "Não foi possível alterar o status do usuário.",
-        variant: "destructive",
-      })
-    }
-  }
+    if (!nome && !email && !perfil) return items
+
+    return items.filter((user) => {
+      const nomeOk = nome ? String(user.nome || "").toLowerCase().includes(nome) : true
+      const emailOk = email ? String(user.email || "").toLowerCase().includes(email) : true
+      const perfilOk = perfil ? getPerfilLabel(user).toLowerCase() === perfil : true
+      return nomeOk && emailOk && perfilOk
+    })
+  }, [items, nomeFilter, emailFilter, perfilFilter])
 
   const remove = async (user: UsuarioResponse) => {
     if (!confirm(`Deseja realmente excluir o usuário "${user.nome}"?`)) return
+    if (!confirm("Deseja realmente excluir o registro?")) return
+
     try {
       await usuariosApi.delete(user.id)
       toast({ title: "Sucesso", description: "Usuário excluído com sucesso." })
@@ -93,33 +97,86 @@ export default function UsuariosPage() {
 
   return (
     <div className="space-y-6">
-      <div className="flex items-center justify-between">
+      <div className="flex flex-col items-start justify-between gap-4 sm:flex-row">
         <div>
           <h1 className="text-2xl font-bold text-gray-900">Gestão de usuários</h1>
           <p className="text-gray-600">Cadastro, status e manutenção de usuários</p>
         </div>
-        <Link href="/usuarios/novo">
-          <Button className="dental-primary">
-            <Plus className="h-4 w-4 mr-2" />
-            Novo usuário
-          </Button>
-        </Link>
+        <div />
       </div>
 
       <Card>
-        <CardHeader>
+        <CardHeader className="space-y-3">
           <CardTitle>Filtros</CardTitle>
+
+          <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+            <div className="grid w-full grid-cols-1 gap-2 sm:grid-cols-3">
+              <Input
+                className="h-10 border-gray-200 bg-white pl-3 shadow-sm"
+                placeholder="Nome"
+                value={nomeFilter}
+                onChange={(e) => setNomeFilter(e.target.value)}
+                disabled={loading}
+              />
+              <Input
+                className="h-10 border-gray-200 bg-white pl-3 shadow-sm"
+                placeholder="E-mail"
+                value={emailFilter}
+                onChange={(e) => setEmailFilter(e.target.value)}
+                disabled={loading}
+              />
+              <Select value={perfilFilter || "__all__"} onValueChange={(value) => setPerfilFilter(value === "__all__" ? "" : value)}>
+                <SelectTrigger className="h-10 border-orange-200 bg-white shadow-sm focus:border-orange-400 focus:ring-orange-500">
+                  <SelectValue placeholder="Perfil" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem
+                    value="__all__"
+                    className="focus:bg-orange-50 focus:text-orange-700 data-[highlighted]:bg-orange-50 data-[highlighted]:text-orange-700"
+                  >
+                    Todos os perfis
+                  </SelectItem>
+                  {perfis.map((perfil) => (
+                    <SelectItem
+                      key={perfil.id}
+                      value={perfil.descricao.toLowerCase()}
+                      className="focus:bg-orange-50 focus:text-orange-700 data-[highlighted]:bg-orange-50 data-[highlighted]:text-orange-700"
+                    >
+                      {perfil.descricao}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+
+            <div className="flex items-center gap-2">
+              <Button onClick={() => load()} disabled={loading} className="btn-primary-custom">
+                <Search className="mr-2 h-4 w-4" />
+                Buscar
+              </Button>
+              <Button
+                onClick={() => {
+                  setNomeFilter("")
+                  setEmailFilter("")
+                  setPerfilFilter("")
+                }}
+                disabled={loading}
+                className="btn-primary-custom"
+              >
+                <Eraser className="mr-2 h-4 w-4" />
+                Limpar
+              </Button>
+              <Link href="/usuarios/novo">
+                <Button className="btn-primary-custom">
+                  <Plus className="mr-2 h-4 w-4" />
+                  Novo
+                </Button>
+              </Link>
+            </div>
+          </div>
         </CardHeader>
         <CardContent>
-          <div className="relative">
-            <Search className="h-4 w-4 absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" />
-            <Input
-              className="pl-10"
-              placeholder="Buscar por nome, email ou perfil..."
-              value={search}
-              onChange={(e) => setSearch(e.target.value)}
-            />
-          </div>
+          <div className="text-sm text-gray-500">Filtre por nome, e-mail e perfil.</div>
         </CardContent>
       </Card>
 
@@ -141,10 +198,11 @@ export default function UsuariosPage() {
                   .join("")
                   .slice(0, 2)
                   .toUpperCase()
+
                 return (
-                  <div key={user.id} className="flex items-center justify-between gap-4 border rounded-lg p-4 hover:bg-gray-50">
+                  <div key={user.id} className="flex items-center justify-between gap-4 rounded-lg border p-4 hover:bg-gray-50">
                     <div className="flex items-center gap-4">
-                      <div className="w-10 h-10 rounded-full bg-cyan-100 text-cyan-700 grid place-items-center font-semibold">
+                      <div className="grid h-10 w-10 place-items-center rounded-full bg-cyan-100 font-semibold text-cyan-700">
                         {initials || "U"}
                       </div>
                       <div>
@@ -165,31 +223,17 @@ export default function UsuariosPage() {
 
                     <div className="flex items-center gap-2">
                       <Link href={`/usuarios/${user.id}/editar`}>
-                        <Button size="sm" variant="outline">
-                          <Edit className="h-4 w-4 mr-1" />
+                        <Button size="sm" className="btn-primary-custom">
+                          <Edit className="mr-1 h-4 w-4" />
                           Editar
                         </Button>
                       </Link>
                       <Button
                         size="sm"
-                        variant="outline"
-                        onClick={() => toggleStatus(user)}
-                        className={user.ativo ? "text-orange-600 hover:bg-orange-50" : "text-green-600 hover:bg-green-50"}
+                        className="btn-primary-custom"
+                        onClick={() => remove(user)}
                       >
-                        {user.ativo ? (
-                          <>
-                            <UserX className="h-4 w-4 mr-1" />
-                            Inativar
-                          </>
-                        ) : (
-                          <>
-                            <UserCheck className="h-4 w-4 mr-1" />
-                            Ativar
-                          </>
-                        )}
-                      </Button>
-                      <Button size="sm" variant="outline" onClick={() => remove(user)} className="text-red-600 hover:bg-red-50">
-                        <Trash2 className="h-4 w-4 mr-1" />
+                        <Trash2 className="mr-1 h-4 w-4" />
                         Excluir
                       </Button>
                     </div>
@@ -203,4 +247,3 @@ export default function UsuariosPage() {
     </div>
   )
 }
-

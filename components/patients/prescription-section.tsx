@@ -40,7 +40,7 @@ export function PrescriptionSection({ pacienteId, patientName }: { pacienteId: s
     observacoes: "",
     dentistaNome: "",
     dentistaCro: "",
-    clinicaNome: "Conect Odonto",
+    clinicaNome: "Cron Dock",
   })
   const [newMedication, setNewMedication] = useState<Partial<Medication>>({
     nome: "",
@@ -118,7 +118,7 @@ export function PrescriptionSection({ pacienteId, patientName }: { pacienteId: s
         observacoes: currentPrescription.observacoes || "",
         dentistaNome: currentPrescription.dentistaNome || "",
         dentistaCro: currentPrescription.dentistaCro || "",
-        clinicaNome: currentPrescription.clinicaNome || "Conect Odonto",
+        clinicaNome: currentPrescription.clinicaNome || "Cron Dock",
       }
 
       setPrescriptions((prev) => [...prev, prescription])
@@ -131,7 +131,7 @@ export function PrescriptionSection({ pacienteId, patientName }: { pacienteId: s
         observacoes: "",
         dentistaNome: "",
         dentistaCro: "",
-        clinicaNome: "Conect Odonto",
+        clinicaNome: "Cron Dock",
       })
 
       setShowForm(false)

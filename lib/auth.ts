@@ -71,4 +71,5 @@ export function clearAuth() {
   if (typeof window === "undefined") return
   localStorage.removeItem("authToken")
   localStorage.removeItem("consultorioId")
+  localStorage.removeItem("odonto.auth.session")
 }

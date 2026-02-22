@@ -32,12 +32,24 @@ export type UsuarioRequest = {
 }
 
 const V1_BASE = "/v1/usuario"
-const V1_PLURAL_BASE = "/v1/usuarios"
-const LEGACY_BASE = "/usuarios"
+const AUTH_SESSION_KEY = "odonto.auth.session"
 
-function getConsultorioId(): string {
+function getGrupoEmpresarialId(): string {
   if (typeof window === "undefined") return "1"
-  return localStorage.getItem("consultorioId") || "1"
+
+  const fromLs = localStorage.getItem("grupoEmpresarialId")
+  if (fromLs) return fromLs
+
+  try {
+    const raw = localStorage.getItem(AUTH_SESSION_KEY)
+    if (raw) {
+      const parsed = JSON.parse(raw)
+      const fromSession = parsed?.user?.grupoEmpresarialId ?? parsed?.grupoEmpresarialId
+      if (fromSession != null && fromSession !== "") return String(fromSession)
+    }
+  } catch {}
+
+  return "1"
 }
 
 function toPage<T>(arr: T[]): Page<T> {
@@ -70,6 +82,8 @@ function normalizePageOrArray<T>(data: any): Page<T> {
 }
 
 function normalizeUsuario(raw: any): UsuarioResponse {
+  const perfis = Array.isArray(raw?.perfis) ? raw.perfis : []
+  const primeiroPerfil = perfis[0]
   const perfilObj =
     raw?.perfil && typeof raw.perfil === "object"
       ? {
@@ -77,16 +91,27 @@ function normalizeUsuario(raw: any): UsuarioResponse {
           descricao: String(raw.perfil.descricao ?? raw.perfil.nome ?? ""),
           ativo: raw.perfil.ativo,
         }
+      : primeiroPerfil && typeof primeiroPerfil === "object"
+        ? {
+            id: Number(primeiroPerfil.id ?? 0),
+            descricao: String(primeiroPerfil.descricao ?? primeiroPerfil.nome ?? ""),
+            ativo: primeiroPerfil.ativo,
+          }
       : null
 
   return {
     id: Number(raw?.id ?? raw?.usuarioId ?? 0),
-    nome: String(raw?.nome ?? raw?.name ?? raw?.usuario ?? ""),
+    nome: String(raw?.nome ?? raw?.descricao ?? raw?.name ?? raw?.usuario ?? ""),
     email: String(raw?.email ?? raw?.login ?? ""),
-    ativo: raw?.ativo ?? raw?.active,
+    ativo:
+      typeof raw?.ativo === "boolean"
+        ? raw.ativo
+        : typeof raw?.active === "boolean"
+          ? raw.active
+          : String(raw?.status ?? "").toUpperCase() === "ATIVO",
     perfil: typeof raw?.perfil === "string" ? raw.perfil : perfilObj,
-    perfilId: raw?.perfilId ?? raw?.perfil?.id ?? null,
-    perfilDescricao: raw?.perfilDescricao ?? raw?.perfil?.descricao ?? raw?.perfil?.nome ?? null,
+    perfilId: raw?.perfilId ?? raw?.perfil?.id ?? primeiroPerfil?.id ?? null,
+    perfilDescricao: raw?.perfilDescricao ?? raw?.perfil?.descricao ?? raw?.perfil?.nome ?? primeiroPerfil?.descricao ?? null,
     dataCriacao: raw?.dataCriacao ?? raw?.createdAt ?? raw?.created_at ?? null,
     createdAt: raw?.createdAt ?? null,
     created_at: raw?.created_at ?? null,
@@ -96,129 +121,92 @@ function normalizeUsuario(raw: any): UsuarioResponse {
   }
 }
 
-function isNotFoundError(error: any): boolean {
-  return Number(error?.status) === 404
+function resolvePerfilId(user: UsuarioResponse): number | undefined {
+  if (typeof user.perfilId === "number" && Number.isFinite(user.perfilId)) return user.perfilId
+  if (user.perfil && typeof user.perfil === "object" && Number.isFinite(user.perfil.id)) return user.perfil.id
+  return undefined
 }
 
-async function tryGet<T>(paths: string[]): Promise<T> {
-  let lastError: any
-  for (const path of paths) {
-    try {
-      return (await api.get(path)) as T
-    } catch (error: any) {
-      lastError = error
-    }
+function toRequestPayload(data: Partial<UsuarioRequest>) {
+  const grupoEmpresarialId = Number(getGrupoEmpresarialId())
+  const payload: Record<string, any> = {
+    grupoEmpresarialId,
   }
-  throw lastError
-}
 
-function buildLegacyQuery(search = "", page = 0, size = 50): string {
-  const params = new URLSearchParams()
-  params.set("page", String(page))
-  params.set("size", String(size))
-  params.set("consultorioId", getConsultorioId())
-  if (search.trim()) params.set("search", search.trim())
-  return `?${params.toString()}`
-}
+  if (data.nome != null) payload.nome = data.nome
+  if (data.email != null) payload.email = data.email
+  if (data.senha != null && data.senha !== "") payload.senha = data.senha
+  if (typeof data.ativo === "boolean") payload.ativo = data.ativo
 
-function toPayload(data: UsuarioRequest, legacy = false) {
-  if (!legacy) return data
-  return {
-    ...data,
-    consultorioId: getConsultorioId(),
+  if (typeof data.perfilId === "number" && Number.isFinite(data.perfilId)) {
+    payload.perfilIds = [data.perfilId]
   }
+
+  return payload
 }
 
 export const usuariosApi = {
   list: async (search = "", page = 0, size = 50): Promise<Page<UsuarioResponse>> => {
-    const qs = new URLSearchParams()
-    qs.set("page", String(page))
-    qs.set("size", String(size))
-    if (search.trim()) qs.set("search", search.trim())
+    const grupoEmpresarialId = encodeURIComponent(getGrupoEmpresarialId())
+    const data = await api.get(`${V1_BASE}/grupo-empresarial/${grupoEmpresarialId}`)
+    const all = normalizePageOrArray<any>(data).content.map(normalizeUsuario)
 
-    const candidates = [
-      `${LEGACY_BASE}${buildLegacyQuery(search, page, size)}`,
-      `${V1_BASE}?${qs.toString()}`,
-      `${V1_PLURAL_BASE}?${qs.toString()}`,
-    ]
+    const term = search.trim().toLowerCase()
+    const filtered = !term
+      ? all
+      : all.filter((u) =>
+          [u.nome, u.email, u.perfilDescricao ?? "", typeof u.perfil === "string" ? u.perfil : u.perfil?.descricao ?? ""]
+            .join(" ")
+            .toLowerCase()
+            .includes(term),
+        )
 
-    let lastError: any
-    for (const path of candidates) {
-      try {
-        const data = await api.get(path)
-        const pageData = normalizePageOrArray<any>(data)
-        return { ...pageData, content: (pageData.content || []).map(normalizeUsuario) }
-      } catch (error: any) {
-        lastError = error
-      }
+    const start = page * size
+    const end = start + size
+    const sliced = filtered.slice(start, end)
+    return {
+      content: sliced,
+      totalElements: filtered.length,
+      totalPages: filtered.length === 0 ? 1 : Math.ceil(filtered.length / size),
+      size,
+      number: page,
+      first: page === 0,
+      last: end >= filtered.length,
     }
-    throw lastError
   },
 
   getById: async (id: string | number): Promise<UsuarioResponse> => {
     const encoded = encodeURIComponent(String(id))
-    const withConsultorio = `?consultorioId=${getConsultorioId()}`
-    const data = await tryGet<any>([
-      `${LEGACY_BASE}/${encoded}${withConsultorio}`,
-      `${V1_BASE}/${encoded}`,
-      `${V1_PLURAL_BASE}/${encoded}`,
-    ])
+    const grupoEmpresarialId = encodeURIComponent(getGrupoEmpresarialId())
+    const data = await api.get(`${V1_BASE}/grupo-empresarial/${grupoEmpresarialId}/${encoded}`)
     return normalizeUsuario(data)
   },
 
   create: async (data: UsuarioRequest): Promise<UsuarioResponse> => {
-    try {
-      return normalizeUsuario(await api.post(V1_BASE, toPayload(data)))
-    } catch (error) {
-      if (!isNotFoundError(error)) throw error
-      return normalizeUsuario(await api.post(LEGACY_BASE, toPayload(data, true)))
-    }
+    return normalizeUsuario(await api.post(V1_BASE, toRequestPayload(data)))
   },
 
   update: async (id: string | number, data: Partial<UsuarioRequest>): Promise<UsuarioResponse> => {
     const encoded = encodeURIComponent(String(id))
-    const candidates = [
-      () => api.put(`${LEGACY_BASE}/${encoded}`, toPayload(data as UsuarioRequest, true)),
-      () => api.put(`${V1_BASE}/${encoded}`, toPayload(data as UsuarioRequest)),
-      () => api.put(`${V1_PLURAL_BASE}/${encoded}`, toPayload(data as UsuarioRequest)),
-    ]
-    let lastError: any
-    for (const call of candidates) {
-      try {
-        return normalizeUsuario(await call())
-      } catch (error: any) {
-        lastError = error
-      }
-    }
-    throw lastError
+    const grupoEmpresarialId = encodeURIComponent(getGrupoEmpresarialId())
+    return normalizeUsuario(await api.put(`${V1_BASE}/grupo-empresarial/${grupoEmpresarialId}/${encoded}`, toRequestPayload(data)))
   },
 
   delete: async (id: string | number): Promise<void> => {
     const encoded = encodeURIComponent(String(id))
-    try {
-      await api.delete(`${V1_BASE}/${encoded}`)
-    } catch (error) {
-      if (!isNotFoundError(error)) throw error
-      await api.delete(`${LEGACY_BASE}/${encoded}?consultorioId=${getConsultorioId()}`)
-    }
+    const grupoEmpresarialId = encodeURIComponent(getGrupoEmpresarialId())
+    await api.delete(`${V1_BASE}/grupo-empresarial/${grupoEmpresarialId}/${encoded}`)
   },
 
   toggleStatus: async (id: string | number, ativo: boolean): Promise<UsuarioResponse> => {
-    const encoded = encodeURIComponent(String(id))
-    const candidates = [
-      () => api.put(`${LEGACY_BASE}/${encoded}/status?ativo=${ativo}&consultorioId=${getConsultorioId()}`),
-      () => api.put(`${V1_BASE}/${encoded}/status?ativo=${ativo}`),
-      () => api.put(`${V1_PLURAL_BASE}/${encoded}/status?ativo=${ativo}`),
-      () => usuariosApi.update(id, { ativo }),
-    ]
-    let lastError: any
-    for (const call of candidates) {
-      try {
-        return normalizeUsuario(await call())
-      } catch (error: any) {
-        lastError = error
-      }
-    }
-    throw lastError
+    // O controller informado não possui endpoint de status.
+    // Reutilizamos o PUT completo, preservando os dados atuais.
+    const current = await usuariosApi.getById(id)
+    return usuariosApi.update(id, {
+      nome: current.nome,
+      email: current.email,
+      ativo,
+      perfilId: resolvePerfilId(current),
+    })
   },
 }

@@ -35,7 +35,7 @@ export function ExamRequestSection({ pacienteId, patientName }: { pacienteId: st
     urgencia: "media",
     dentistaNome: "",
     dentistaCro: "",
-    clinicaNome: "Conect Odonto", // Updated clinic name
+    clinicaNome: "Cron Dock", // Updated clinic name
     laboratorio: "",
   })
 
@@ -114,7 +114,7 @@ export function ExamRequestSection({ pacienteId, patientName }: { pacienteId: st
       urgencia: newRequest.urgencia || "media",
       dentistaNome: newRequest.dentistaNome || "",
       dentistaCro: newRequest.dentistaCro || "",
-      clinicaNome: newRequest.clinicaNome || "Conect Odonto", // Updated clinic name
+      clinicaNome: newRequest.clinicaNome || "Cron Dock", // Updated clinic name
       laboratorio: newRequest.laboratorio || "",
     }
 
@@ -127,7 +127,7 @@ export function ExamRequestSection({ pacienteId, patientName }: { pacienteId: st
       urgencia: "media",
       dentistaNome: "",
       dentistaCro: "",
-      clinicaNome: "Conect Odonto", // Updated clinic name
+      clinicaNome: "Cron Dock", // Updated clinic name
       laboratorio: "",
     })
     setShowForm(false)

@@ -1,37 +1,19 @@
 import { LoginForm } from "@/components/auth/login-form"
 
-const ConnectOdontoLogo = () => (
-  <div className="flex flex-col items-center gap-2 mb-8">
-    <h1 className="text-5xl font-bold tracking-tight">
-      <span className="text-cyan-400">Conect</span> <span className="text-blue-500">Odonto</span>
-    </h1>
-    <p className="text-white/90 text-sm font-medium tracking-wide">Sistema de Gestão Odontológica Inteligente</p>
-  </div>
-)
-
 export default function LoginPage() {
   return (
-    <div className="min-h-screen relative flex items-center justify-center p-4">
+    <div className="relative flex min-h-dvh w-full items-center justify-center overflow-hidden p-4 sm:p-6">
       <div
-        className="absolute inset-0 bg-cover bg-center bg-no-repeat"
+        className="absolute inset-0 bg-cover bg-top bg-no-repeat"
         style={{
-          backgroundImage: `url('/modern-dental-office-equipment-only.jpg')`,
+          backgroundImage: `url('/login.png')`,
         }}
       />
-      <div className="absolute inset-0 bg-slate-900/70" />
+      <div className="absolute inset-0 bg-gradient-to-b from-slate-900/35 via-slate-900/45 to-slate-950/60" />
 
-      {/* Content */}
-      <div className="relative z-10 w-full max-w-md">
-        <div className="text-center">
-          <ConnectOdontoLogo />
-        </div>
-
-        <div className="bg-white/95 backdrop-blur-sm border border-white/20 rounded-2xl shadow-2xl p-8">
+      <div className="relative z-10 mt-28 w-full max-w-md sm:mt-32 md:mt-36">
+        <div className="rounded-2xl border border-white/20 bg-white/95 p-6 shadow-2xl backdrop-blur-sm sm:p-8">
           <LoginForm />
-        </div>
-
-        <div className="text-center mt-6">
-          <p className="text-sm text-white/80">© 2025 Conect Odonto. Todos os direitos reservados.</p>
         </div>
       </div>
     </div>

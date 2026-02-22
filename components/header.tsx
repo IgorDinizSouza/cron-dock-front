@@ -5,6 +5,7 @@ import { Menu, Bell, Settings, LogOut } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { clearAuth } from "@/lib/auth"
 import { useRouter } from "next/navigation"
+import { useAuth } from "@/contexts/auth-context"
 
 interface HeaderProps {
   toggle: () => void
@@ -21,8 +22,10 @@ const CronDockLogo = () => (
 
 export function Header({ toggle }: HeaderProps) {
   const router = useRouter()
+  const { signOut } = useAuth()
 
   const doLogout = () => {
+    signOut()
     clearAuth()
     router.replace("/login")
   }

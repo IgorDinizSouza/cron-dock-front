@@ -5,11 +5,12 @@ import type React from "react"
 import Link from "next/link"
 import { useEffect, useMemo, useState } from "react"
 import { useParams, useRouter } from "next/navigation"
-import { ArrowLeft, Loader2, Save, X } from "lucide-react"
+import { ArrowLeft, Loader2, Save } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { useToast } from "@/hooks/use-toast"
 import { roleApi } from "@/lib/perfil"
 
@@ -36,11 +37,7 @@ export default function EditarRolePage() {
 
   const hasChanges = useMemo(() => {
     if (!original) return false
-    return (
-      formData.nome !== original.nome ||
-      formData.descricao !== original.descricao ||
-      formData.ativo !== original.ativo
-    )
+    return formData.nome !== original.nome || formData.descricao !== original.descricao || formData.ativo !== original.ativo
   }, [formData, original])
 
   useEffect(() => {
@@ -59,7 +56,7 @@ export default function EditarRolePage() {
       } catch (error: any) {
         toast({
           title: "Erro",
-          description: error?.message || "Não foi possível carregar a role.",
+          description: error?.message || "Nao foi possivel carregar a role.",
           variant: "destructive",
         })
         router.push("/roles")
@@ -76,7 +73,7 @@ export default function EditarRolePage() {
     if (!roleId) return
 
     if (!formData.nome.trim()) {
-      toast({ title: "Erro", description: "Nome é obrigatório.", variant: "destructive" })
+      toast({ title: "Erro", description: "Nome e obrigatorio.", variant: "destructive" })
       return
     }
 
@@ -92,7 +89,7 @@ export default function EditarRolePage() {
     } catch (error: any) {
       toast({
         title: "Erro",
-        description: error?.message || "Não foi possível atualizar a role.",
+        description: error?.message || "Nao foi possivel atualizar a role.",
         variant: "destructive",
       })
     } finally {
@@ -106,26 +103,29 @@ export default function EditarRolePage() {
 
   return (
     <div className="space-y-6">
-      <div className="flex items-center gap-4">
-        <Link href="/roles">
-          <Button variant="ghost" size="sm">
-            <ArrowLeft className="h-4 w-4 mr-2" />
-            Voltar
-          </Button>
-        </Link>
-        <div>
-          <h1 className="text-2xl font-bold text-gray-900">Editar role</h1>
-          <p className="text-gray-600">Atualize nome, descrição e status</p>
+      <div className="flex flex-col items-start justify-between gap-4 sm:flex-row">
+        <div className="flex items-center gap-4">
+          <Link href="/roles">
+            <Button size="sm" className="btn-primary-custom">
+              <ArrowLeft className="mr-2 h-4 w-4" />
+              Voltar
+            </Button>
+          </Link>
+          <div>
+            <h1 className="text-2xl font-bold text-gray-900">Editar role</h1>
+            <p className="text-gray-600">Atualize nome, descrição e status</p>
+          </div>
         </div>
+        <div />
       </div>
 
       <form onSubmit={handleSubmit}>
         <Card>
-          <CardHeader>
+          <CardHeader className="space-y-1">
             <CardTitle>Dados da role</CardTitle>
           </CardHeader>
           <CardContent className="space-y-4">
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
               <div>
                 <Label htmlFor="nome">Nome *</Label>
                 <Input
@@ -133,45 +133,53 @@ export default function EditarRolePage() {
                   value={formData.nome}
                   onChange={(e) => setFormData((prev) => ({ ...prev, nome: e.target.value }))}
                   disabled={loading}
+                  className="h-10 border-gray-200 bg-white shadow-sm"
                 />
               </div>
               <div>
                 <Label htmlFor="ativo">Status</Label>
-                <select
-                  id="ativo"
-                  value={formData.ativo ? "true" : "false"}
-                  onChange={(e) => setFormData((prev) => ({ ...prev, ativo: e.target.value === "true" }))}
-                  className="border-input rounded-md px-3 py-2 bg-white w-full h-10"
-                  disabled={loading}
-                >
-                  <option value="true">Ativo</option>
-                  <option value="false">Inativo</option>
-                </select>
+                <Select value={formData.ativo ? "true" : "false"} onValueChange={(value) => setFormData((prev) => ({ ...prev, ativo: value === "true" }))}>
+                  <SelectTrigger
+                    id="ativo"
+                    className="h-10 border-orange-200 bg-white shadow-sm focus:border-orange-400 focus:ring-orange-500"
+                  >
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem
+                      value="true"
+                      className="focus:bg-orange-50 focus:text-orange-700 data-[highlighted]:bg-orange-50 data-[highlighted]:text-orange-700"
+                    >
+                      Ativo
+                    </SelectItem>
+                    <SelectItem
+                      value="false"
+                      className="focus:bg-orange-50 focus:text-orange-700 data-[highlighted]:bg-orange-50 data-[highlighted]:text-orange-700"
+                    >
+                      Inativo
+                    </SelectItem>
+                  </SelectContent>
+                </Select>
               </div>
             </div>
 
             <div>
-              <Label htmlFor="descricao">Descrição</Label>
+              <Label htmlFor="descricao">Descricao</Label>
               <Input
                 id="descricao"
                 value={formData.descricao}
                 onChange={(e) => setFormData((prev) => ({ ...prev, descricao: e.target.value }))}
                 disabled={loading}
+                className="h-10 border-gray-200 bg-white shadow-sm"
               />
             </div>
           </CardContent>
         </Card>
 
         <div className="flex justify-end gap-4 pt-6">
-          <Link href="/roles">
-            <Button type="button" variant="outline" disabled={loading}>
-              <X className="h-4 w-4 mr-2" />
-              Cancelar
-            </Button>
-          </Link>
-          <Button type="submit" className="dental-primary" disabled={loading || !hasChanges}>
-            {loading ? <Loader2 className="h-4 w-4 mr-2 animate-spin" /> : <Save className="h-4 w-4 mr-2" />}
-            Salvar alteracoes
+          <Button type="submit" className="btn-primary-custom" disabled={loading || !hasChanges}>
+            {loading ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <Save className="mr-2 h-4 w-4" />}
+            Salvar
           </Button>
         </div>
       </form>

@@ -16,10 +16,10 @@ type AnyAppointment = {
   dentist?: string
   procedimentoNome?: string
   procedure?: string
-  dataHora?: string // "2025-08-22T09:00"
-  date?: string     // "2025-08-22"
-  time?: string     // "09:00"
-  duracao?: number  // minutos
+  dataHora?: string 
+  date?: string     
+  time?: string     
+  duracao?: number  
   price?: number
   preco?: number
 }

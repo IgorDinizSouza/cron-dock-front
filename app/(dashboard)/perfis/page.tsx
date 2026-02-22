@@ -3,12 +3,13 @@
 import { useEffect, useMemo, useState } from "react"
 import Link from "next/link"
 import { useToast } from "@/hooks/use-toast"
-import { perfilApi, type PerfilResponse } from "@/lib/perfil"
+import { perfilApi, roleApi, type PerfilResponse, type RoleResponse } from "@/lib/perfil"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Input } from "@/components/ui/input"
 import { Badge } from "@/components/ui/badge"
-import { Edit, Plus, Search, Trash2 } from "lucide-react"
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
+import { Edit, Eraser, Plus, Search, Trash2 } from "lucide-react"
 
 function roleNames(perfil: PerfilResponse): string {
   if (!Array.isArray(perfil.roles) || perfil.roles.length === 0) return "-"
@@ -18,8 +19,10 @@ function roleNames(perfil: PerfilResponse): string {
 export default function PerfisPage() {
   const { toast } = useToast()
   const [items, setItems] = useState<PerfilResponse[]>([])
+  const [roles, setRoles] = useState<RoleResponse[]>([])
   const [loading, setLoading] = useState(true)
-  const [search, setSearch] = useState("")
+  const [descricaoFilter, setDescricaoFilter] = useState("")
+  const [roleFilter, setRoleFilter] = useState("")
 
   const load = async () => {
     try {
@@ -29,7 +32,7 @@ export default function PerfisPage() {
     } catch (error: any) {
       toast({
         title: "Erro",
-        description: error?.message || "Não foi possível carregar os perfis.",
+        description: error?.message || "Nao foi possivel carregar os perfis.",
         variant: "destructive",
       })
     } finally {
@@ -39,24 +42,40 @@ export default function PerfisPage() {
 
   useEffect(() => {
     load()
+    ;(async () => {
+      try {
+        setRoles(await roleApi.listAll())
+      } catch {
+        setRoles([])
+      }
+    })()
   }, [])
 
   const filtered = useMemo(() => {
-    const term = search.trim().toLowerCase()
-    if (!term) return items
-    return items.filter((item) => [item.descricao, roleNames(item)].join(" ").toLowerCase().includes(term))
-  }, [items, search])
+    const descricao = descricaoFilter.trim().toLowerCase()
+    const role = roleFilter.trim().toLowerCase()
+
+    if (!descricao && !role) return items
+
+    return items.filter((item) => {
+      const descOk = descricao ? String(item.descricao || "").toLowerCase().includes(descricao) : true
+      const roleOk = role
+        ? (item.roles || []).some((r) => String(r.nome || "").toLowerCase() === role)
+        : true
+      return descOk && roleOk
+    })
+  }, [items, descricaoFilter, roleFilter])
 
   const remove = async (item: PerfilResponse) => {
     if (!confirm(`Deseja realmente excluir o perfil "${item.descricao}"?`)) return
     try {
       await perfilApi.delete(item.id)
-      toast({ title: "Sucesso", description: "Perfil excluído com sucesso." })
+      toast({ title: "Sucesso", description: "Perfil excluido com sucesso." })
       await load()
     } catch (error: any) {
       toast({
         title: "Erro",
-        description: error?.message || "Não foi possível excluir o perfil.",
+        description: error?.message || "Nao foi possivel excluir o perfil.",
         variant: "destructive",
       })
     }
@@ -64,28 +83,67 @@ export default function PerfisPage() {
 
   return (
     <div className="space-y-6">
-      <div className="flex items-center justify-between">
+      <div className="flex flex-col items-start justify-between gap-4 sm:flex-row">
         <div>
           <h1 className="text-2xl font-bold text-gray-900">Perfis</h1>
           <p className="text-gray-600">Gerencie os perfis de acesso</p>
         </div>
-        <Link href="/perfis/novo">
-          <Button className="dental-primary">
-            <Plus className="h-4 w-4 mr-2" />
-            Novo perfil
-          </Button>
-        </Link>
+        <div />
       </div>
 
       <Card>
-        <CardHeader>
+        <CardHeader className="space-y-3">
           <CardTitle>Filtros</CardTitle>
+          <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+            <div className="grid w-full grid-cols-1 gap-2 sm:grid-cols-2">
+              <Input
+                className="h-10 border-gray-200 bg-white pl-3 shadow-sm"
+                placeholder="Descricao"
+                value={descricaoFilter}
+                onChange={(e) => setDescricaoFilter(e.target.value)}
+                disabled={loading}
+              />
+
+              <Select value={roleFilter || "__all__"} onValueChange={(value) => setRoleFilter(value === "__all__" ? "" : value)}>
+                <SelectTrigger className="h-10 border-orange-200 bg-white shadow-sm focus:border-orange-400 focus:ring-orange-500">
+                  <SelectValue placeholder="Roles" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem
+                    value="__all__"
+                    className="focus:bg-orange-50 focus:text-orange-700 data-[highlighted]:bg-orange-50 data-[highlighted]:text-orange-700"
+                  >
+                    Todas as roles
+                  </SelectItem>
+                  {roles.map((role) => (
+                    <SelectItem
+                      key={role.id}
+                      value={role.nome.toLowerCase()}
+                      className="focus:bg-orange-50 focus:text-orange-700 data-[highlighted]:bg-orange-50 data-[highlighted]:text-orange-700"
+                    >
+                      {role.nome}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+
+            <div className="flex items-center gap-2">
+              <Button onClick={() => load()} disabled={loading} className="btn-primary-custom">
+                <Search className="mr-2 h-4 w-4" />
+                Buscar
+              </Button>
+              <Link href="/perfis/novo">
+                <Button className="btn-primary-custom">
+                  <Plus className="mr-2 h-4 w-4" />
+                  Novo perfil
+                </Button>
+              </Link>
+            </div>
+          </div>
         </CardHeader>
         <CardContent>
-          <div className="relative">
-            <Search className="h-4 w-4 absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" />
-            <Input placeholder="Buscar por descrição ou role..." value={search} onChange={(e) => setSearch(e.target.value)} className="pl-10" />
-          </div>
+          <div className="text-sm text-gray-500">Filtre por descrição e role.</div>
         </CardContent>
       </Card>
 
@@ -102,7 +160,7 @@ export default function PerfisPage() {
             <div className="overflow-x-auto">
               <table className="w-full text-sm">
                 <thead>
-                  <tr className="text-left border-b">
+                  <tr className="border-b text-left">
                     <th className="py-3 pr-4">Descrição</th>
                     <th className="py-3 pr-4">Roles</th>
                     <th className="py-3 pr-4">Status</th>
@@ -115,18 +173,20 @@ export default function PerfisPage() {
                       <td className="py-3 pr-4 font-medium">{item.descricao}</td>
                       <td className="py-3 pr-4">{roleNames(item)}</td>
                       <td className="py-3 pr-4">
-                        <Badge variant={item.ativo === false ? "outline" : "secondary"}>{item.ativo === false ? "Inativo" : "Ativo"}</Badge>
+                        <Badge variant={item.ativo === false ? "outline" : "secondary"}>
+                          {item.ativo === false ? "Inativo" : "Ativo"}
+                        </Badge>
                       </td>
                       <td className="py-3 text-right">
                         <div className="inline-flex gap-2">
                           <Link href={`/perfis/${item.id}/editar`}>
-                            <Button size="sm" variant="outline">
-                              <Edit className="h-4 w-4 mr-1" />
+                            <Button size="sm" className="btn-primary-custom">
+                              <Edit className="mr-1 h-4 w-4" />
                               Editar
                             </Button>
                           </Link>
-                          <Button size="sm" variant="outline" onClick={() => remove(item)} className="text-red-600 hover:bg-red-50">
-                            <Trash2 className="h-4 w-4 mr-1" />
+                          <Button size="sm" className="btn-primary-custom" onClick={() => remove(item)}>
+                            <Trash2 className="mr-1 h-4 w-4" />
                             Excluir
                           </Button>
                         </div>
@@ -142,4 +202,3 @@ export default function PerfisPage() {
     </div>
   )
 }
-

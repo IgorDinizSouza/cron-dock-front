@@ -88,16 +88,6 @@ export default function RolesPage() {
                 <Search className="h-4 w-4 mr-2" />
                 Buscar
               </Button>
-              <Button
-                onClick={() => {
-                  setSearch("")
-                  load("")
-                }}
-                className="btn-primary-custom"
-              >
-                <Eraser className="h-4 w-4 mr-2" />
-                Limpar
-              </Button>
               <Link href="/roles/novo">
                 <Button className="btn-primary-custom">
                   <Plus className="h-4 w-4 mr-2" />
@@ -140,12 +130,12 @@ export default function RolesPage() {
                       <td className="py-3 text-right">
                         <div className="inline-flex gap-2">
                           <Link href={`/roles/${item.id}/editar`}>
-                            <Button size="sm" variant="outline">
+                            <Button size="sm" className="btn-primary-custom">
                               <Edit className="h-4 w-4 mr-1" />
                               Editar
                             </Button>
                           </Link>
-                          <Button size="sm" variant="outline" onClick={() => remove(item)} className="text-red-600 hover:bg-red-50">
+                          <Button size="sm" className="btn-primary-custom" onClick={() => remove(item)}>
                             <Trash2 className="h-4 w-4 mr-1" />
                             Excluir
                           </Button>

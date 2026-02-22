@@ -141,7 +141,7 @@ export function BudgetHistorySection({
 
         const clinicInfo: ClinicInfo = {
           id: me.id,
-          name: me.nome ?? "Conect Odonto",
+          name: me.nome ?? "Cron Dock",
           email: me.email ?? undefined,
           phone: me.telefone ?? undefined,
           cep: me.cep ?? undefined,
