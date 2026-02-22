@@ -1,22 +1,56 @@
 "use client";
 
-import { useMemo } from "react";
+import { useMemo, useState } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { Building, Calendar, Home, KeyRound, Settings, Shield, ShoppingCart, Stethoscope, UsersIcon, X } from "lucide-react";
+import {
+  ChevronDown,
+  ChevronRight,
+  FolderOpen,
+  PackageCheck,
+  Settings,
+  Stethoscope,
+  Truck,
+  UsersIcon,
+  Building,
+  Shield,
+  KeyRound,
+  Calendar,
+  CalendarDays,
+  ClipboardCheck,
+  ListChecks,
+  SlidersHorizontal,
+  X,
+} from "lucide-react";
 import { cn } from "@/lib/utils";
 import { useSidebar } from "@/contexts/sidebar-context";
 import { useAuth } from "@/contexts/auth-context";
 
-const navigation = [
-  { name: "Dashboard", href: "/", icon: Home },
+type MenuItem = {
+  name: string;
+  href: string;
+  icon: any;
+};
+
+const topNavigation: MenuItem[] = [
+  { name: "Pedidos", href: "/pedidos", icon: PackageCheck },
+  { name: "Configurações", href: "/configuracoes", icon: Settings },
+];
+
+const centralAgendamentosNavigation: MenuItem[] = [
+  { name: "Calendário", href: "/agendamentos", icon: Calendar },
+  { name: "Monitor de aprovação", href: "/agendamentos/monitor-aprovacao", icon: ClipboardCheck },
+  { name: "Aprovação de usuários", href: "/agendamentos/aprovacao-usuarios", icon: UsersIcon },
+  { name: "Listagem de cargas agendadas", href: "/agendamentos/cargas-agendadas", icon: ListChecks },
+  { name: "Ajustes de saldo p/ cargas", href: "/agendamentos/ajustes-saldo-cargas", icon: SlidersHorizontal },
+];
+
+const cadastroNavigation: MenuItem[] = [
   { name: "Grupo empresarial", href: "/grupos-empresariais", icon: Building },
-  { name: "Pedidos", href: "/pedidos", icon: ShoppingCart },
-  { name: "Agendamentos", href: "/agendamentos", icon: Calendar },
   { name: "Usuários", href: "/usuarios", icon: UsersIcon },
   { name: "Perfis", href: "/perfis", icon: Shield },
   { name: "Roles", href: "/roles", icon: KeyRound },
-  { name: "Configurações", href: "/configuracoes", icon: Settings },
+  { name: "Transportador", href: "/transportadores", icon: Truck },
 ];
 
 function getInitials(fullName?: string) {
@@ -28,10 +62,110 @@ function getInitials(fullName?: string) {
   return (letters[0] || "") + (letters[1] || "");
 }
 
+function NavLink({
+  item,
+  pathname,
+  toggle,
+  compactIndent = false,
+}: {
+  item: MenuItem;
+  pathname: string;
+  toggle: () => void;
+  compactIndent?: boolean;
+}) {
+  const active = pathname === item.href || pathname.startsWith(`${item.href}/`);
+
+  return (
+    <Link
+      href={item.href}
+      className={cn(
+        "flex items-center rounded-lg px-3 py-2 text-sm font-medium transition-colors",
+        compactIndent ? "text-[13px]" : "",
+        active
+          ? "border-r-2 border-orange-500 bg-orange-50 text-orange-700"
+          : "text-gray-600 hover:bg-orange-50 hover:text-orange-700",
+      )}
+      onClick={() => {
+        if (typeof window !== "undefined" && window.innerWidth < 1024) toggle();
+      }}
+    >
+      <item.icon className={cn("mr-3 h-5 w-5", active ? "text-orange-500" : "text-gray-400")} />
+      {item.name}
+    </Link>
+  );
+}
+
+function SubmenuBlock({
+  title,
+  icon: Icon,
+  items,
+  pathname,
+  toggle,
+  isOpen,
+  onToggle,
+}: {
+  title: string;
+  icon: any;
+  items: MenuItem[];
+  pathname: string;
+  toggle: () => void;
+  isOpen: boolean;
+  onToggle: () => void;
+}) {
+  const anyActive = items.some((item) => pathname === item.href || pathname.startsWith(`${item.href}/`));
+
+  return (
+    <div className="pt-1">
+      <button
+        type="button"
+        onClick={onToggle}
+        className={cn(
+          "mb-2 flex w-full items-center rounded-lg px-3 py-2 text-sm font-semibold transition-colors",
+          anyActive ? "bg-orange-50 text-orange-700" : "text-gray-700",
+          "hover:bg-orange-50 hover:text-orange-700",
+        )}
+      >
+        <Icon className={cn("mr-3 h-5 w-5", anyActive ? "text-orange-500" : "text-orange-500")} />
+        {title}
+        <ChevronDown className={cn("ml-auto h-4 w-4 transition-transform", isOpen ? "rotate-180 text-orange-500" : "text-gray-400")} />
+      </button>
+
+      {isOpen && (
+        <div className="space-y-1 pl-2">
+          {items.map((item) => {
+            const active = pathname === item.href || pathname.startsWith(`${item.href}/`);
+            return (
+              <Link
+                key={item.name}
+                href={item.href}
+                className={cn(
+                  "flex items-center rounded-lg px-3 py-2 text-sm font-medium transition-colors",
+                  active
+                    ? "border-r-2 border-orange-500 bg-orange-50 text-orange-700"
+                    : "text-gray-600 hover:bg-orange-50 hover:text-orange-700",
+                )}
+                onClick={() => {
+                  if (typeof window !== "undefined" && window.innerWidth < 1024) toggle();
+                }}
+              >
+                <ChevronRight className={cn("mr-2 h-4 w-4", active ? "text-orange-500" : "text-gray-400")} />
+                <item.icon className={cn("mr-2 h-4 w-4", active ? "text-orange-500" : "text-gray-400")} />
+                {item.name}
+              </Link>
+            );
+          })}
+        </div>
+      )}
+    </div>
+  );
+}
+
 export function Sidebar() {
   const pathname = usePathname();
   const { isOpen, toggle } = useSidebar();
   const { user, perfis, roles } = useAuth();
+  const [centralOpen, setCentralOpen] = useState(false);
+  const [cadastrosOpen, setCadastrosOpen] = useState(false);
 
   const userName = user?.descricao || user?.email || "Usuario";
   const userRole = perfis[0]?.descricao || roles[0]?.nome || "";
@@ -41,7 +175,7 @@ export function Sidebar() {
     <>
       <aside
         className={cn(
-          "fixed inset-y-0 left-0 z-40 w-64 bg-white border-r border-gray-200 transform transition-transform duration-300 ease-in-out",
+          "fixed inset-y-0 left-0 z-40 w-72 border-r border-gray-200 bg-white transform transition-transform duration-300 ease-in-out",
           isOpen ? "translate-x-0" : "-translate-x-full",
         )}
         aria-label="Menu lateral"
@@ -62,33 +196,35 @@ export function Sidebar() {
             </button>
           </div>
 
-          <nav className="flex-1 space-y-2 px-4 py-6">
-            {navigation.map((item) => {
-              const active = pathname === item.href;
-              return (
-                <Link
-                  key={item.name}
-                  href={item.href}
-                  className={cn(
-                    "flex items-center rounded-lg px-3 py-2 text-sm font-medium transition-colors",
-                    active
-                      ? "bg-cyan-50 text-cyan-700 border-r-2 border-cyan-600"
-                      : "text-gray-600 hover:bg-gray-50 hover:text-gray-900",
-                  )}
-                  onClick={() => {
-                    if (typeof window !== "undefined" && window.innerWidth < 1024) toggle();
-                  }}
-                >
-                  <item.icon className={cn("mr-3 h-5 w-5", active ? "text-cyan-600" : "text-gray-400")} />
-                  {item.name}
-                </Link>
-              );
-            })}
+          <nav className="flex-1 space-y-3 overflow-y-auto px-4 py-6">
+            <SubmenuBlock
+              title="Central de agendamentos"
+              icon={CalendarDays}
+              items={centralAgendamentosNavigation}
+              pathname={pathname}
+              toggle={toggle}
+              isOpen={centralOpen}
+              onToggle={() => setCentralOpen((v) => !v)}
+            />
+
+            <NavLink item={topNavigation[0]} pathname={pathname} toggle={toggle} />
+
+            <SubmenuBlock
+              title="Cadastros"
+              icon={FolderOpen}
+              items={cadastroNavigation}
+              pathname={pathname}
+              toggle={toggle}
+              isOpen={cadastrosOpen}
+              onToggle={() => setCadastrosOpen((v) => !v)}
+            />
+
+            <NavLink item={topNavigation[1]} pathname={pathname} toggle={toggle} />
           </nav>
 
           <div className="border-t border-gray-200 p-4">
             <div className="flex items-center space-x-3">
-              <div className="grid h-8 w-8 place-items-center rounded-full bg-red-400 font-semibold text-white">{initials}</div>
+              <div className="grid h-8 w-8 place-items-center rounded-full bg-orange-400 font-semibold text-white">{initials}</div>
               <div className="min-w-0 flex-1">
                 <p className="truncate text-sm font-medium text-gray-900">{userName}</p>
                 {userRole && <p className="truncate text-xs text-gray-500">{userRole}</p>}
@@ -100,8 +236,8 @@ export function Sidebar() {
 
       <div
         className={cn(
-          "fixed inset-0 bg-black/40 z-30 transition-opacity lg:hidden",
-          isOpen ? "opacity-100 pointer-events-auto" : "opacity-0 pointer-events-none",
+          "fixed inset-0 z-30 bg-black/40 transition-opacity lg:hidden",
+          isOpen ? "pointer-events-auto opacity-100" : "pointer-events-none opacity-0",
         )}
         onClick={toggle}
         aria-hidden="true"
