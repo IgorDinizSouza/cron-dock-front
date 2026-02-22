@@ -1,16 +1,15 @@
 "use client"
 
 import { useEffect, useMemo, useState } from "react"
-import { useRouter } from "next/navigation"
+import Link from "next/link"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
-import { Pencil, Search, Eraser } from "lucide-react"
+import { Eye, Search, Eraser } from "lucide-react"
 import { useToast } from "@/hooks/use-toast"
 import { pedidoApi, type PedidoResponse as Pedido } from "@/lib/pedido"
 
 export default function PedidosPage() {
-  const router = useRouter()
   const { toast } = useToast()
 
   const [items, setItems] = useState<Pedido[]>([])
@@ -64,8 +63,6 @@ export default function PedidosPage() {
       return true
     })
   }, [items, search, filialFilter, fornecedorFilter, pedidoFilter, compradorFilter, dataCriacaoFilter, statusFilter])
-
-  const handleEdit = (id: number) => router.push(`/pedidos/${id}`)
 
   return (
     <div className="space-y-6">
@@ -220,10 +217,12 @@ export default function PedidosPage() {
                         </span>
                       </td>
                       <td className="py-3 text-right">
-                        <Button size="sm" onClick={() => handleEdit(g.id)} className="btn-primary-custom">
-                          <Pencil className="mr-2 h-4 w-4" />
-                          Editar
-                        </Button>
+                        <Link href={`/pedidos/${encodeURIComponent(String(g.pedido ?? g.id))}`}>
+                          <Button size="sm" className="btn-primary-custom">
+                            <Eye className="mr-2 h-4 w-4" />
+                            Visualizar pedido
+                          </Button>
+                        </Link>
                       </td>
                     </tr>
                   ))}
@@ -236,4 +235,3 @@ export default function PedidosPage() {
     </div>
   )
 }
-

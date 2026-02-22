@@ -1,25 +1,30 @@
 "use client";
 
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import {
-  ChevronDown,
-  ChevronRight,
-  FolderOpen,
-  PackageCheck,
-  Settings,
-  Stethoscope,
-  Truck,
-  UsersIcon,
-  Building,
-  Shield,
-  KeyRound,
   Calendar,
   CalendarDays,
+  CarFront,
+  ChevronDown,
+  ChevronRight,
   ClipboardCheck,
+  Factory,
+  FolderOpen,
+  KeyRound,
   ListChecks,
+  Package,
+  PackageCheck,
+  Settings,
+  Shield,
   SlidersHorizontal,
+  Stethoscope,
+  Store,
+  Truck,
+  User,
+  UsersIcon,
+  Building,
   X,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
@@ -32,26 +37,29 @@ type MenuItem = {
   icon: any;
 };
 
-const topNavigation: MenuItem[] = [
-  { name: "Pedidos", href: "/pedidos", icon: PackageCheck },
-  { name: "Configurações", href: "/configuracoes", icon: Settings },
-];
+const topNavigation: MenuItem[] = [{ name: "Pedidos", href: "/pedidos", icon: PackageCheck }];
 
 const centralAgendamentosNavigation: MenuItem[] = [
-  { name: "Calendário", href: "/agendamentos", icon: Calendar },
-  { name: "Monitor de aprovação", href: "/agendamentos/monitor-aprovacao", icon: ClipboardCheck },
-  { name: "Aprovação de usuários", href: "/agendamentos/aprovacao-usuarios", icon: UsersIcon },
+  { name: "Calendario", href: "/agendamentos", icon: Calendar },
+  { name: "Monitor de aprovacao", href: "/agendamentos/monitor-aprovacao", icon: ClipboardCheck },
+  { name: "Aprovacao de usuarios", href: "/agendamentos/aprovacao-usuarios", icon: UsersIcon },
   { name: "Listagem de cargas agendadas", href: "/agendamentos/cargas-agendadas", icon: ListChecks },
   { name: "Ajustes de saldo p/ cargas", href: "/agendamentos/ajustes-saldo-cargas", icon: SlidersHorizontal },
 ];
 
 const cadastroNavigation: MenuItem[] = [
   { name: "Grupo empresarial", href: "/grupos-empresariais", icon: Building },
-  { name: "Usuários", href: "/usuarios", icon: UsersIcon },
+  { name: "Usuarios", href: "/usuarios", icon: UsersIcon },
   { name: "Perfis", href: "/perfis", icon: Shield },
-  { name: "Roles", href: "/roles", icon: KeyRound },
+  { name: "Permissoes", href: "/roles", icon: KeyRound },
   { name: "Transportador", href: "/transportadores", icon: Truck },
+  { name: "Fornecedor", href: "/fornecedores", icon: Factory },
+  { name: "Filial", href: "/filiais", icon: Store },
+  { name: "Comprador", href: "/compradores", icon: User },
+  { name: "Produto", href: "/produtos", icon: Package },
 ];
+
+const configuracoesNavigation: MenuItem[] = [{ name: "Tipo de veiculo", href: "/tipos-veiculo", icon: CarFront }];
 
 function getInitials(fullName?: string) {
   if (!fullName) return "U";
@@ -81,9 +89,7 @@ function NavLink({
       className={cn(
         "flex items-center rounded-lg px-3 py-2 text-sm font-medium transition-colors",
         compactIndent ? "text-[13px]" : "",
-        active
-          ? "border-r-2 border-orange-500 bg-orange-50 text-orange-700"
-          : "text-gray-600 hover:bg-orange-50 hover:text-orange-700",
+        active ? "border-r-2 border-orange-500 bg-orange-50 text-orange-700" : "text-gray-600 hover:bg-orange-50 hover:text-orange-700",
       )}
       onClick={() => {
         if (typeof window !== "undefined" && window.innerWidth < 1024) toggle();
@@ -125,7 +131,7 @@ function SubmenuBlock({
           "hover:bg-orange-50 hover:text-orange-700",
         )}
       >
-        <Icon className={cn("mr-3 h-5 w-5", anyActive ? "text-orange-500" : "text-orange-500")} />
+        <Icon className="mr-3 h-5 w-5 text-orange-500" />
         {title}
         <ChevronDown className={cn("ml-auto h-4 w-4 transition-transform", isOpen ? "rotate-180 text-orange-500" : "text-gray-400")} />
       </button>
@@ -140,9 +146,7 @@ function SubmenuBlock({
                 href={item.href}
                 className={cn(
                   "flex items-center rounded-lg px-3 py-2 text-sm font-medium transition-colors",
-                  active
-                    ? "border-r-2 border-orange-500 bg-orange-50 text-orange-700"
-                    : "text-gray-600 hover:bg-orange-50 hover:text-orange-700",
+                  active ? "border-r-2 border-orange-500 bg-orange-50 text-orange-700" : "text-gray-600 hover:bg-orange-50 hover:text-orange-700",
                 )}
                 onClick={() => {
                   if (typeof window !== "undefined" && window.innerWidth < 1024) toggle();
@@ -162,18 +166,39 @@ function SubmenuBlock({
 
 export function Sidebar() {
   const pathname = usePathname();
-  const { isOpen, toggle } = useSidebar();
+  const { isOpen, toggle, setIsOpen } = useSidebar();
   const { user, perfis, roles } = useAuth();
+  const asideRef = useRef<HTMLElement | null>(null);
   const [centralOpen, setCentralOpen] = useState(false);
   const [cadastrosOpen, setCadastrosOpen] = useState(false);
+  const [configOpen, setConfigOpen] = useState(false);
 
   const userName = user?.descricao || user?.email || "Usuario";
   const userRole = perfis[0]?.descricao || roles[0]?.nome || "";
   const initials = useMemo(() => getInitials(userName), [userName]);
 
+  useEffect(() => {
+    if (!isOpen) return;
+
+    const onPointerDown = (event: MouseEvent | TouchEvent) => {
+      const target = event.target as Node | null;
+      if (!target) return;
+      if (asideRef.current?.contains(target)) return;
+      setIsOpen(false);
+    };
+
+    document.addEventListener("mousedown", onPointerDown);
+    document.addEventListener("touchstart", onPointerDown);
+    return () => {
+      document.removeEventListener("mousedown", onPointerDown);
+      document.removeEventListener("touchstart", onPointerDown);
+    };
+  }, [isOpen, setIsOpen]);
+
   return (
     <>
       <aside
+        ref={asideRef}
         className={cn(
           "fixed inset-y-0 left-0 z-40 w-72 border-r border-gray-200 bg-white transform transition-transform duration-300 ease-in-out",
           isOpen ? "translate-x-0" : "-translate-x-full",
@@ -183,12 +208,11 @@ export function Sidebar() {
         <div className="flex h-full flex-col">
           <div className="flex h-16 items-center justify-between border-b border-gray-200 px-4">
             <div className="flex items-center space-x-2">
-              <div className="grid h-8 w-8 place-items-center rounded-lg bg-cyan-600">
+              <div className="grid h-8 w-8 place-items-center rounded-lg bg-orange-500">
                 <Stethoscope className="h-5 w-5 text-white" />
               </div>
               <div>
-                <h1 className="font-serif text-lg font-bold leading-tight text-gray-900">Cron</h1>
-                <p className="-mt-1 text-xs font-medium text-cyan-600">Dock</p>
+                <h1 className="text-sm font-bold leading-tight text-orange-600">CronDock - Agendamentos e pátios</h1>
               </div>
             </div>
             <button className="rounded-md p-2 hover:bg-gray-100 lg:hidden" onClick={toggle} aria-label="Fechar menu">
@@ -219,7 +243,15 @@ export function Sidebar() {
               onToggle={() => setCadastrosOpen((v) => !v)}
             />
 
-            <NavLink item={topNavigation[1]} pathname={pathname} toggle={toggle} />
+            <SubmenuBlock
+              title="Configurações"
+              icon={Settings}
+              items={configuracoesNavigation}
+              pathname={pathname}
+              toggle={toggle}
+              isOpen={configOpen}
+              onToggle={() => setConfigOpen((v) => !v)}
+            />
           </nav>
 
           <div className="border-t border-gray-200 p-4">
@@ -239,7 +271,7 @@ export function Sidebar() {
           "fixed inset-0 z-30 bg-black/40 transition-opacity lg:hidden",
           isOpen ? "pointer-events-auto opacity-100" : "pointer-events-none opacity-0",
         )}
-        onClick={toggle}
+        onClick={() => setIsOpen(false)}
         aria-hidden="true"
       />
     </>

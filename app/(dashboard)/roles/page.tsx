@@ -125,7 +125,15 @@ export default function RolesPage() {
                       <td className="py-3 pr-4 font-medium">{item.nome}</td>
                       <td className="py-3 pr-4">{item.descricao || "-"}</td>
                       <td className="py-3 pr-4">
-                        <Badge variant={item.ativo === false ? "outline" : "secondary"}>{item.ativo === false ? "Inativo" : "Ativo"}</Badge>
+                        <Badge
+                          className={
+                            item.ativo === false
+                              ? "border-red-200 bg-red-100 text-red-800 hover:bg-red-100"
+                              : "border-green-200 bg-green-100 text-green-800 hover:bg-green-100"
+                          }
+                        >
+                          {item.ativo === false ? "Inativo" : "Ativo"}
+                        </Badge>
                       </td>
                       <td className="py-3 text-right">
                         <div className="inline-flex gap-2">

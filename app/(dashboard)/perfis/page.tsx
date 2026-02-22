@@ -173,7 +173,13 @@ export default function PerfisPage() {
                       <td className="py-3 pr-4 font-medium">{item.descricao}</td>
                       <td className="py-3 pr-4">{roleNames(item)}</td>
                       <td className="py-3 pr-4">
-                        <Badge variant={item.ativo === false ? "outline" : "secondary"}>
+                        <Badge
+                          className={
+                            item.ativo === false
+                              ? "border-red-200 bg-red-100 text-red-800 hover:bg-red-100"
+                              : "border-green-200 bg-green-100 text-green-800 hover:bg-green-100"
+                          }
+                        >
                           {item.ativo === false ? "Inativo" : "Ativo"}
                         </Badge>
                       </td>

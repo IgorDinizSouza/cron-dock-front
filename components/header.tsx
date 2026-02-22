@@ -1,6 +1,5 @@
 "use client"
 
-import Image from "next/image"
 import { Menu, Bell, Settings, LogOut } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { clearAuth } from "@/lib/auth"
@@ -11,11 +10,13 @@ interface HeaderProps {
   toggle: () => void
 }
 
-// Text logo using brand palette (Cron in blue, Dock in orange)
+// Text logo in the same orange palette used by action buttons
 const CronDockLogo = () => (
   <div className="flex items-center select-none">
     <div className="flex items-center gap-2">
-      <span className="text-3xl font-extrabold text-[#0B66C2] leading-none">Cron Dock</span>
+      <span className="text-xl sm:text-2xl font-extrabold text-orange-500 leading-none">
+        CronDock - Agendamentos e pátios
+      </span>
     </div>
   </div>
 )

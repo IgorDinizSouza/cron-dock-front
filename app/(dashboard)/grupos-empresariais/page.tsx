@@ -174,7 +174,7 @@ export default function GrupoEmpresaPage() {
                       <td className="py-3 pr-4">
                         <span
                           className={`inline-flex items-center rounded-md px-2 py-1 text-xs font-medium ${
-                            g.ativo ? "bg-green-100 text-green-800" : "bg-gray-100 text-gray-700"
+                            g.ativo ? "bg-green-100 text-green-800" : "bg-red-100 text-red-800"
                           }`}
                         >
                           {g.ativo ? "Ativo" : "Inativo"}
@@ -199,4 +199,3 @@ export default function GrupoEmpresaPage() {
     </div>
   )
 }
-

@@ -209,7 +209,15 @@ export default function UsuariosPage() {
                         <div className="flex items-center gap-2">
                           <p className="font-medium text-gray-900">{user.nome}</p>
                           <Badge variant="secondary">{getPerfilLabel(user)}</Badge>
-                          {!user.ativo && <Badge variant="outline">Inativo</Badge>}
+                          <Badge
+                            className={
+                              user.ativo
+                                ? "border-green-200 bg-green-100 text-green-800 hover:bg-green-100"
+                                : "border-red-200 bg-red-100 text-red-800 hover:bg-red-100"
+                            }
+                          >
+                            {user.ativo ? "Ativo" : "Inativo"}
+                          </Badge>
                         </div>
                         <p className="text-sm text-gray-600">{user.email}</p>
                         <p className="text-xs text-gray-500">

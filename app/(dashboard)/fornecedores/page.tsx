@@ -2,34 +2,33 @@
 
 import { useEffect, useMemo, useState } from "react"
 import Link from "next/link"
-import { useRouter } from "next/navigation"
+import { Building2, Edit, Eraser, Plus, Search, Trash2 } from "lucide-react"
+import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Input } from "@/components/ui/input"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { useToast } from "@/hooks/use-toast"
-import { transportadorApi, type TransportadorResponse } from "@/lib/transportador"
-import { Badge } from "@/components/ui/badge"
-import { Edit, Eraser, Plus, Search, Trash2, Truck } from "lucide-react"
+import { fornecedorApi, type FornecedorResponse } from "@/lib/fornecedor"
 
-export default function TransportadoresPage() {
-  const router = useRouter()
+export default function FornecedoresPage() {
   const { toast } = useToast()
-
-  const [items, setItems] = useState<TransportadorResponse[]>([])
+  const [items, setItems] = useState<FornecedorResponse[]>([])
   const [loading, setLoading] = useState(true)
-  const [descricaoFilter, setDescricaoFilter] = useState("")
+  const [razaoSocialFilter, setRazaoSocialFilter] = useState("")
   const [cnpjFilter, setCnpjFilter] = useState("")
+  const [cidadeFilter, setCidadeFilter] = useState("")
+  const [ufFilter, setUfFilter] = useState("")
   const [statusFilter, setStatusFilter] = useState("")
 
   const load = async () => {
     try {
       setLoading(true)
-      setItems(await transportadorApi.listByGrupoEmpresarial())
+      setItems(await fornecedorApi.listByGrupoEmpresarial())
     } catch (error: any) {
       toast({
         title: "Erro",
-        description: error?.message || "Não foi possível carregar os transportadores.",
+        description: error?.message || "Não foi possível carregar os fornecedores.",
         variant: "destructive",
       })
     } finally {
@@ -42,32 +41,34 @@ export default function TransportadoresPage() {
   }, [])
 
   const filtered = useMemo(() => {
-    const descricao = descricaoFilter.trim().toLowerCase()
+    const razaoSocial = razaoSocialFilter.trim().toLowerCase()
     const cnpj = cnpjFilter.trim().toLowerCase()
+    const cidade = cidadeFilter.trim().toLowerCase()
+    const uf = ufFilter.trim().toLowerCase()
     const status = statusFilter.trim().toUpperCase()
 
-    if (!descricao && !cnpj && !status) return items
-
     return items.filter((item) => {
-      const okDescricao = descricao ? item.descricao.toLowerCase().includes(descricao) : true
+      const okRazaoSocial = razaoSocial ? item.razaoSocial.toLowerCase().includes(razaoSocial) : true
       const okCnpj = cnpj ? item.cnpj.toLowerCase().includes(cnpj) : true
+      const okCidade = cidade ? (item.cidade || "").toLowerCase().includes(cidade) : true
+      const okUf = uf ? (item.uf || "").toLowerCase().includes(uf) : true
       const okStatus = status ? String(item.status || "").toUpperCase() === status : true
-      return okDescricao && okCnpj && okStatus
+      return okRazaoSocial && okCnpj && okCidade && okUf && okStatus
     })
-  }, [items, descricaoFilter, cnpjFilter, statusFilter])
+  }, [items, razaoSocialFilter, cnpjFilter, cidadeFilter, ufFilter, statusFilter])
 
-  const remove = async (item: TransportadorResponse) => {
-    if (!confirm(`Deseja realmente excluir o transportador "${item.descricao}"?`)) return
+  const handleDelete = async (item: FornecedorResponse) => {
+    if (!confirm(`Deseja realmente excluir o fornecedor "${item.razaoSocial}"?`)) return
     if (!confirm("Deseja realmente excluir o registro?")) return
 
     try {
-      await transportadorApi.delete(item.id)
-      toast({ title: "Sucesso", description: "Transportador excluído com sucesso." })
+      await fornecedorApi.delete(item.id)
+      toast({ title: "Sucesso", description: "Fornecedor excluído com sucesso." })
       await load()
     } catch (error: any) {
       toast({
         title: "Erro",
-        description: error?.message || "Não foi possível excluir o transportador.",
+        description: error?.message || "Não foi possível excluir o fornecedor.",
         variant: "destructive",
       })
     }
@@ -77,7 +78,7 @@ export default function TransportadoresPage() {
     <div className="space-y-6">
       <div className="flex flex-col items-start justify-between gap-4 sm:flex-row">
         <div>
-          <h1 className="text-2xl font-bold text-gray-900">Transportadores</h1>
+          <h1 className="text-2xl font-bold text-gray-900">Fornecedores</h1>
           <p className="text-gray-600">Cadastro e gerenciamento por grupo empresarial</p>
         </div>
         <div />
@@ -86,14 +87,15 @@ export default function TransportadoresPage() {
       <Card>
         <CardHeader className="space-y-3">
           <CardTitle>Filtros</CardTitle>
-          <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
-            <div className="grid w-full grid-cols-1 gap-2 sm:grid-cols-3">
+          <div className="flex flex-col gap-3">
+            <div className="grid w-full grid-cols-1 gap-2 md:grid-cols-2 xl:grid-cols-5">
               <Input
                 className="h-10 border-gray-200 bg-white pl-3 shadow-sm"
-                placeholder="Descrição"
-                value={descricaoFilter}
-                onChange={(e) => setDescricaoFilter(e.target.value)}
+                placeholder="Razão social"
+                value={razaoSocialFilter}
+                onChange={(e) => setRazaoSocialFilter(e.target.value)}
                 disabled={loading}
+                maxLength={200}
               />
               <Input
                 className="h-10 border-gray-200 bg-white pl-3 shadow-sm"
@@ -101,6 +103,23 @@ export default function TransportadoresPage() {
                 value={cnpjFilter}
                 onChange={(e) => setCnpjFilter(e.target.value)}
                 disabled={loading}
+                maxLength={50}
+              />
+              <Input
+                className="h-10 border-gray-200 bg-white pl-3 shadow-sm"
+                placeholder="Cidade"
+                value={cidadeFilter}
+                onChange={(e) => setCidadeFilter(e.target.value)}
+                disabled={loading}
+                maxLength={120}
+              />
+              <Input
+                className="h-10 border-gray-200 bg-white pl-3 uppercase shadow-sm"
+                placeholder="UF"
+                value={ufFilter}
+                onChange={(e) => setUfFilter(e.target.value.toUpperCase().slice(0, 2))}
+                disabled={loading}
+                maxLength={2}
               />
               <Select value={statusFilter || "__all__"} onValueChange={(value) => setStatusFilter(value === "__all__" ? "" : value)}>
                 <SelectTrigger className="h-10 border-orange-200 bg-white shadow-sm focus:border-orange-400 focus:ring-orange-500">
@@ -120,15 +139,17 @@ export default function TransportadoresPage() {
               </Select>
             </div>
 
-            <div className="flex items-center gap-2">
-              <Button onClick={() => load()} disabled={loading} className="btn-primary-custom">
+            <div className="flex flex-wrap items-center gap-2">
+              <Button onClick={load} disabled={loading} className="btn-primary-custom">
                 <Search className="mr-2 h-4 w-4" />
                 Buscar
               </Button>
               <Button
                 onClick={() => {
-                  setDescricaoFilter("")
+                  setRazaoSocialFilter("")
                   setCnpjFilter("")
+                  setCidadeFilter("")
+                  setUfFilter("")
                   setStatusFilter("")
                 }}
                 className="btn-primary-custom"
@@ -137,7 +158,7 @@ export default function TransportadoresPage() {
                 <Eraser className="mr-2 h-4 w-4" />
                 Limpar
               </Button>
-              <Link href="/transportadores/novo">
+              <Link href="/fornecedores/novo">
                 <Button className="btn-primary-custom">
                   <Plus className="mr-2 h-4 w-4" />
                   Novo
@@ -147,30 +168,30 @@ export default function TransportadoresPage() {
           </div>
         </CardHeader>
         <CardContent>
-          <div className="text-sm text-gray-500">Filtre por descrição, CNPJ e status.</div>
+          <div className="text-sm text-gray-500">Filtre por razão social, CNPJ, cidade, UF e status.</div>
         </CardContent>
       </Card>
 
       <Card>
         <CardHeader>
-          <CardTitle>Transportadores ({filtered.length})</CardTitle>
+          <CardTitle>Fornecedores ({filtered.length})</CardTitle>
         </CardHeader>
         <CardContent>
           {loading ? (
-            <div className="py-10 text-center text-gray-500">Carregando transportadores...</div>
+            <div className="py-10 text-center text-gray-500">Carregando fornecedores...</div>
           ) : filtered.length === 0 ? (
-            <div className="py-10 text-center text-gray-500">Nenhum transportador encontrado.</div>
+            <div className="py-10 text-center text-gray-500">Nenhum fornecedor encontrado.</div>
           ) : (
             <div className="space-y-3">
               {filtered.map((item) => (
-                <div key={item.id} className="flex items-center justify-between gap-4 rounded-lg border p-4 hover:bg-gray-50">
-                  <div className="flex items-center gap-4">
+                <div key={item.id} className="flex flex-col gap-4 rounded-lg border p-4 hover:bg-gray-50 lg:flex-row lg:items-center lg:justify-between">
+                  <div className="flex items-start gap-4">
                     <div className="grid h-10 w-10 place-items-center rounded-full bg-orange-100 text-orange-700">
-                      <Truck className="h-5 w-5" />
+                      <Building2 className="h-5 w-5" />
                     </div>
                     <div>
-                      <div className="flex items-center gap-2">
-                        <p className="font-medium text-gray-900">{item.descricao}</p>
+                      <div className="flex flex-wrap items-center gap-2">
+                        <p className="font-medium text-gray-900">{item.razaoSocial}</p>
                         <Badge
                           className={
                             item.status === "INATIVO"
@@ -182,18 +203,19 @@ export default function TransportadoresPage() {
                         </Badge>
                       </div>
                       <p className="text-sm text-gray-600">CNPJ: {item.cnpj || "-"}</p>
-                      <p className="text-xs text-gray-500">Grupo empresarial: {item.grupoEmpresarialId}</p>
+                      <p className="text-sm text-gray-600">Cidade/UF: {[item.cidade, item.uf].filter(Boolean).join(" / ") || "-"}</p>
+                      <p className="text-xs text-gray-500">Data de cadastro: {item.dataCadastro || "-"}</p>
                     </div>
                   </div>
 
                   <div className="flex items-center gap-2">
-                    <Link href={`/transportadores/${item.id}/editar`}>
+                    <Link href={`/fornecedores/${item.id}/editar`}>
                       <Button size="sm" className="btn-primary-custom">
                         <Edit className="mr-1 h-4 w-4" />
                         Editar
                       </Button>
                     </Link>
-                    <Button size="sm" className="btn-primary-custom" onClick={() => remove(item)}>
+                    <Button size="sm" className="btn-primary-custom" onClick={() => handleDelete(item)}>
                       <Trash2 className="mr-1 h-4 w-4" />
                       Excluir
                     </Button>
