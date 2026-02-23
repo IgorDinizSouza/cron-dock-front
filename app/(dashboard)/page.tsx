@@ -1,7 +1,7 @@
-"use client"
+﻿"use client"
 
 import { useEffect, useState } from "react"
-import { patientsApi, appointmentsApi, proceduresApi, budgetsApi } from "@/lib/api"
+import { appointmentsApi, budgetsApi } from "@/lib/api"
 
 
 interface DashboardStats {
@@ -40,18 +40,10 @@ export default function RootPage() {
   useEffect(() => {
     const loadDashboardData = async () => {
       try {
-         const [
-                  pacientesRes,
-                  agendamentosRes,
-                  procedimentosRes,
-                  orcamentosRes,
-                ] = await Promise.all([
-                  patientsApi.getAll(),                 // pacientes
-                  appointmentsApi.getAll(0, 1000),      // agendamentos
-                  proceduresApi.getAll(0, 1000),        // procedimentos
-                  budgetsApi.list(0, 1000),             // orçamentos
-                ]            
-       )
+        const [agendamentosRes, orcamentosRes] = await Promise.all([
+          appointmentsApi.getAll(0, 1000), // agendamentos
+          budgetsApi.list(0, 1000), // orçamentos
+        ])
 
         const hoje = new Date().toISOString().split("T")[0]
         const consultasHojeData =
@@ -60,7 +52,7 @@ export default function RootPage() {
         const mesAtual = new Date().getMonth()
         const anoAtual = new Date().getFullYear()
 
-        // Calcular faturamento do mês atual
+        // Calcular faturamento do mÃªs atual
         const faturamentoMes =
           orcamentosRes.content?.reduce((total: number, orcamento: any) => {
             const dataOrcamento = new Date(orcamento.createdAt || orcamento.data)
@@ -71,12 +63,12 @@ export default function RootPage() {
           }, 0) || 0
 
         setStats({
-          totalPacientes: pacientesRes.totalElements || 0,
+          totalPacientes: 0,
           consultasHoje: consultasHojeData.length,
-          totalProcedimentos: procedimentosRes.totalElements || 0,
+          totalProcedimentos: 0,
           faturamentoMes,
           consultasPendentes: consultasHojeData.filter((c: any) => c.status === "AGENDADO").length,
-          crescimentoPacientes: Math.floor(Math.random() * 20), // Placeholder até implementar cálculo real
+          crescimentoPacientes: Math.floor(Math.random() * 20), // Placeholder atÃ© implementar cÃ¡lculo real
           crescimentoProcedimentos: Math.floor(Math.random() * 30),
           crescimentoFaturamento: Math.floor(Math.random() * 15),
         })
@@ -85,7 +77,7 @@ export default function RootPage() {
           consultasHojeData.slice(0, 5).map((agendamento: any) => ({
             id: agendamento.id,
             horario: agendamento.horario || "00:00",
-            paciente: agendamento.pacienteNome || "Paciente não informado",
+            paciente: agendamento.pacienteNome || "Paciente nÃ£o informado",
             procedimento: agendamento.procedimentoNome || "Consulta",
             status:
               agendamento.status === "AGENDADO"
@@ -124,7 +116,7 @@ export default function RootPage() {
         </div>
       </div>
 
-      {/* Cards de métricas */}
+      {/* Cards de mÃ©tricas */}
       <div
         style={{
           display: "grid",
@@ -145,7 +137,7 @@ export default function RootPage() {
             <div>
               <p style={{ color: "#6b7280", fontSize: "14px", marginBottom: "4px" }}>Pacientes Ativos</p>
               <p style={{ fontSize: "32px", fontWeight: "bold", color: "#0891b2" }}>{stats.totalPacientes}</p>
-              <p style={{ color: "#10b981", fontSize: "12px" }}>+{stats.crescimentoPacientes} este mês</p>
+              <p style={{ color: "#10b981", fontSize: "12px" }}>+{stats.crescimentoPacientes} este mÃªs</p>
             </div>
             <div
               style={{
@@ -158,7 +150,7 @@ export default function RootPage() {
                 justifyContent: "center",
               }}
             >
-              👥
+              ðŸ‘¥
             </div>
           </div>
         </div>
@@ -188,7 +180,7 @@ export default function RootPage() {
                 justifyContent: "center",
               }}
             >
-              📅
+              ðŸ“…
             </div>
           </div>
         </div>
@@ -205,7 +197,7 @@ export default function RootPage() {
             <div>
               <p style={{ color: "#6b7280", fontSize: "14px", marginBottom: "4px" }}>Procedimentos</p>
               <p style={{ fontSize: "32px", fontWeight: "bold", color: "#0891b2" }}>{stats.totalProcedimentos}</p>
-              <p style={{ color: "#10b981", fontSize: "12px" }}>+{stats.crescimentoProcedimentos}% este mês</p>
+              <p style={{ color: "#10b981", fontSize: "12px" }}>+{stats.crescimentoProcedimentos}% este mÃªs</p>
             </div>
             <div
               style={{
@@ -218,7 +210,7 @@ export default function RootPage() {
                 justifyContent: "center",
               }}
             >
-              🦷
+              ðŸ¦·
             </div>
           </div>
         </div>
@@ -237,7 +229,7 @@ export default function RootPage() {
               <p style={{ fontSize: "32px", fontWeight: "bold", color: "#0891b2" }}>
                 R$ {(stats.faturamentoMes / 1000).toFixed(1)}k
               </p>
-              <p style={{ color: "#10b981", fontSize: "12px" }}>+{stats.crescimentoFaturamento}% este mês</p>
+              <p style={{ color: "#10b981", fontSize: "12px" }}>+{stats.crescimentoFaturamento}% este mÃªs</p>
             </div>
             <div
               style={{
@@ -250,7 +242,7 @@ export default function RootPage() {
                 justifyContent: "center",
               }}
             >
-              💰
+              ðŸ’°
             </div>
           </div>
         </div>
@@ -318,3 +310,4 @@ export default function RootPage() {
     </div>
   )
 }
+

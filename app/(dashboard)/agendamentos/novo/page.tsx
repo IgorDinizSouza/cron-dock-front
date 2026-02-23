@@ -2,7 +2,6 @@ import { ArrowLeft } from "lucide-react"
 import Link from "next/link"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
-import { AppointmentForm } from "@/components/appointments/appointment-form"
 
 export default function NovoAgendamentoPage() {
   return (
@@ -22,10 +21,12 @@ export default function NovoAgendamentoPage() {
 
       <Card>
         <CardHeader>
-          <CardTitle>Informações do Agendamento</CardTitle>
+          <CardTitle>Informacoes do Agendamento</CardTitle>
         </CardHeader>
         <CardContent>
-          <AppointmentForm />
+          <div className="rounded-md border border-amber-200 bg-amber-50 p-4 text-sm text-amber-800">
+            Formulario de agendamento removido desta versao.
+          </div>
         </CardContent>
       </Card>
     </div>
