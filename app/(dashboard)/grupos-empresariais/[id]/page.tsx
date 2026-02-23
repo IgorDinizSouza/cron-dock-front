@@ -13,14 +13,13 @@ import { ArrowLeft, Save, X, Loader2 } from "lucide-react"
 import { useToast } from "@/hooks/use-toast"
 import { grupoEmpresarialApi, type GrupoEmpresarialResponse as GrupoEmpresa } from "@/lib/grupoempresarial"
 
-
 function onlyDigits(v: string) {
   return (v || "").replace(/\D/g, "")
 }
 
 export default function EditarGrupoEmpresaPage() {
   const router = useRouter()
-  const params = useParams()
+  const params = useParams<{ id: string }>()
   const { toast } = useToast()
 
   const [loading, setLoading] = useState(false)
@@ -58,7 +57,7 @@ export default function EditarGrupoEmpresaPage() {
       } catch (e: any) {
         toast({
           title: "Erro",
-          description: e?.message || "Não foi possível carregar o grupo de empresa",
+          description: e?.message || "Nao foi possivel carregar o grupo de empresa",
           variant: "destructive",
         })
         router.push("/grupos-empresariais")
@@ -91,19 +90,19 @@ export default function EditarGrupoEmpresaPage() {
     const cnpj = onlyDigits(formData.cnpj)
 
     if (!desc) {
-      toast({ title: "Erro", description: "Descrição é obrigatória", variant: "destructive" })
+      toast({ title: "Erro", description: "Descricao e obrigatoria", variant: "destructive" })
       return false
     }
     if (desc.length < 3) {
-      toast({ title: "Erro", description: "Descrição deve ter pelo menos 3 caracteres", variant: "destructive" })
+      toast({ title: "Erro", description: "Descricao deve ter pelo menos 3 caracteres", variant: "destructive" })
       return false
     }
     if (!cnpj) {
-      toast({ title: "Erro", description: "CNPJ é obrigatório", variant: "destructive" })
+      toast({ title: "Erro", description: "CNPJ e obrigatorio", variant: "destructive" })
       return false
     }
     if (cnpj.length < 8 || cnpj.length > 18) {
-      toast({ title: "Erro", description: "CNPJ inválido (tamanho incorreto)", variant: "destructive" })
+      toast({ title: "Erro", description: "CNPJ invalido (tamanho incorreto)", variant: "destructive" })
       return false
     }
     return true
@@ -126,7 +125,7 @@ export default function EditarGrupoEmpresaPage() {
     } catch (e: any) {
       toast({
         title: "Erro",
-        description: e?.message || "Não foi possível atualizar o grupo empresarial",
+        description: e?.message || "Nao foi possivel atualizar o grupo empresarial",
         variant: "destructive",
       })
     } finally {
@@ -135,44 +134,41 @@ export default function EditarGrupoEmpresaPage() {
   }
 
   if (loadingData) {
-    return (
-      <div className="space-y-6">
-        <div className="flex items-center justify-center h-64">
-          <div className="text-gray-500">Carregando dados do grupo...</div>
-        </div>
-      </div>
-    )
+    return <div className="py-12 text-center text-gray-500">Carregando dados do grupo...</div>
   }
 
   return (
     <div className="space-y-6">
-      <div className="flex items-center gap-4">
-        <Link href="/grupos-empresariais">
-          <Button variant="ghost" size="sm">
-            <ArrowLeft className="h-4 w-4 mr-2" />
-            Voltar
-          </Button>
-        </Link>
+      <div className="flex flex-col items-start justify-between gap-4 sm:flex-row">
+        <div className="flex items-center gap-4">
+          <Link href="/grupos-empresariais">
+            <Button size="sm" className="btn-primary-custom">
+              <ArrowLeft className="mr-2 h-4 w-4" />
+              Voltar
+            </Button>
+          </Link>
 
-        <div>
-          <h1 className="text-2xl font-bold text-gray-900">Editar Grupo Empresarial</h1>
-          <p className="text-gray-600">Altere as informações do grupo</p>
+          <div>
+            <h1 className="text-2xl font-bold text-gray-900">Editar Grupo Empresarial</h1>
+            <p className="text-gray-600">Altere as informacoes do grupo</p>
+          </div>
         </div>
+        <div />
       </div>
 
       <form onSubmit={handleSubmit}>
         <Card>
-          <CardHeader>
-            <CardTitle>Informações</CardTitle>
+          <CardHeader className="space-y-1">
+            <CardTitle>Informacoes do grupo empresarial</CardTitle>
           </CardHeader>
 
           <CardContent className="space-y-4">
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
               <div>
-                <Label htmlFor="descricao">Descrição *</Label>
+                <Label htmlFor="descricao">Descricao *</Label>
                 <Input
                   id="descricao"
-                  className="pl-3 shadow-sm border-gray-200 bg-white h-10 placeholder:font-italic"
+                  className="h-10 border-gray-200 bg-white shadow-sm"
                   value={formData.descricao}
                   onChange={(e) => handleChange("descricao", e.target.value)}
                   required
@@ -184,7 +180,7 @@ export default function EditarGrupoEmpresaPage() {
                 <Label htmlFor="cnpj">CNPJ *</Label>
                 <Input
                   id="cnpj"
-                  className="pl-3 shadow-sm border-gray-200 bg-white h-10 placeholder:font-italic"
+                  className="h-10 border-gray-200 bg-white shadow-sm"
                   value={formData.cnpj}
                   onChange={(e) => handleChange("cnpj", e.target.value)}
                   required
@@ -193,19 +189,20 @@ export default function EditarGrupoEmpresaPage() {
               </div>
             </div>
 
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
               <div>
                 <Label htmlFor="ativo">Status</Label>
-                <Select
-                  value={formData.ativo ? "true" : "false"}
-                  onValueChange={(value) => handleChange("ativo", value === "true")}
-                >
-                  <SelectTrigger className="border-gray-200 bg-white h-10 shadow-sm">
+                <Select value={formData.ativo ? "true" : "false"} onValueChange={(value) => handleChange("ativo", value === "true")} disabled={loading}>
+                  <SelectTrigger id="ativo" className="h-10 border-orange-200 bg-white shadow-sm focus:border-orange-400 focus:ring-orange-500">
                     <SelectValue />
                   </SelectTrigger>
                   <SelectContent>
-                    <SelectItem value="true">Ativo</SelectItem>
-                    <SelectItem value="false">Inativo</SelectItem>
+                    <SelectItem value="true" className="focus:bg-orange-50 focus:text-orange-700 data-[highlighted]:bg-orange-50 data-[highlighted]:text-orange-700">
+                      Ativo
+                    </SelectItem>
+                    <SelectItem value="false" className="focus:bg-orange-50 focus:text-orange-700 data-[highlighted]:bg-orange-50 data-[highlighted]:text-orange-700">
+                      Inativo
+                    </SelectItem>
                   </SelectContent>
                 </Select>
               </div>
@@ -213,17 +210,17 @@ export default function EditarGrupoEmpresaPage() {
           </CardContent>
         </Card>
 
-        <div className="flex justify-end space-x-4 pt-6">
+        <div className="flex justify-end gap-4 pt-6">
           <Link href="/grupos-empresariais">
-            <Button type="button" variant="outline" disabled={loading}>
-              <X className="h-4 w-4 mr-2" />
+            <Button type="button" className="btn-primary-custom" disabled={loading}>
+              <X className="mr-2 h-4 w-4" />
               Cancelar
             </Button>
           </Link>
 
           <Button type="submit" className="btn-primary-custom" disabled={loading || !hasChanges}>
-            {loading ? <Loader2 className="h-4 w-4 mr-2 animate-spin" /> : <Save className="h-4 w-4 mr-2" />}
-            Salvar Alterações
+            {loading ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <Save className="mr-2 h-4 w-4" />}
+            Salvar alteracoes
           </Button>
         </div>
       </form>

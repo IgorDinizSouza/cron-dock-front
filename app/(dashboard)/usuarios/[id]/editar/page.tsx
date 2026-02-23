@@ -17,8 +17,8 @@ import { usuariosApi, type UsuarioResponse } from "@/lib/usuarios"
 
 const USUARIO_DESCRICAO_MAX = 100
 const USUARIO_EMAIL_MAX = 150
-// Senha nao consta no DDL enviado; aplicando limite conservador de UI.
-const USUARIO_SENHA_MAX = 100
+// Senha conforme DDL (varchar(255)).
+const USUARIO_SENHA_MAX = 255
 
 type FormState = {
   nome: string

@@ -15,6 +15,8 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { useToast } from "@/hooks/use-toast"
 import { perfilApi, roleApi, type RoleResponse } from "@/lib/perfil"
 
+const PERFIL_DESCRICAO_MAX = 100
+
 export default function NovoPerfilPage() {
   const router = useRouter()
   const { toast } = useToast()
@@ -57,6 +59,14 @@ export default function NovoPerfilPage() {
     e.preventDefault()
     if (!descricao.trim()) {
       toast({ title: "Erro", description: "Descricao e obrigatoria.", variant: "destructive" })
+      return
+    }
+    if (descricao.trim().length > PERFIL_DESCRICAO_MAX) {
+      toast({
+        title: "Erro",
+        description: `Descricao deve ter no maximo ${PERFIL_DESCRICAO_MAX} caracteres.`,
+        variant: "destructive",
+      })
       return
     }
 
@@ -113,6 +123,7 @@ export default function NovoPerfilPage() {
                   value={descricao}
                   onChange={(e) => setDescricao(e.target.value)}
                   disabled={loading}
+                  maxLength={PERFIL_DESCRICAO_MAX}
                   className="h-10 border-gray-200 bg-white shadow-sm"
                 />
               </div>
@@ -189,4 +200,3 @@ export default function NovoPerfilPage() {
     </div>
   )
 }
-

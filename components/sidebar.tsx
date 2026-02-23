@@ -40,18 +40,18 @@ type MenuItem = {
 const topNavigation: MenuItem[] = [{ name: "Pedidos", href: "/pedidos", icon: PackageCheck }];
 
 const centralAgendamentosNavigation: MenuItem[] = [
-  { name: "Calendario", href: "/agendamentos", icon: Calendar },
-  { name: "Monitor de aprovacao", href: "/agendamentos/monitor-aprovacao", icon: ClipboardCheck },
-  { name: "Aprovacao de usuarios", href: "/agendamentos/aprovacao-usuarios", icon: UsersIcon },
+  { name: "Calendário", href: "/agendamentos", icon: Calendar },
+  { name: "Monitor de aprovação", href: "/agendamentos/monitor-aprovacao", icon: ClipboardCheck },
+  { name: "Aprovação de usuarios", href: "/agendamentos/aprovacao-usuarios", icon: UsersIcon },
   { name: "Listagem de cargas agendadas", href: "/agendamentos/cargas-agendadas", icon: ListChecks },
   { name: "Ajustes de saldo p/ cargas", href: "/agendamentos/ajustes-saldo-cargas", icon: SlidersHorizontal },
 ];
 
 const cadastroNavigation: MenuItem[] = [
   { name: "Grupo empresarial", href: "/grupos-empresariais", icon: Building },
-  { name: "Usuarios", href: "/usuarios", icon: UsersIcon },
+  { name: "Usuários", href: "/usuarios", icon: UsersIcon },
   { name: "Perfis", href: "/perfis", icon: Shield },
-  { name: "Permissoes", href: "/roles", icon: KeyRound },
+  { name: "Permissões", href: "/roles", icon: KeyRound },
   { name: "Transportador", href: "/transportadores", icon: Truck },
   { name: "Fornecedor", href: "/fornecedores", icon: Factory },
   { name: "Filial", href: "/filiais", icon: Store },
@@ -59,7 +59,7 @@ const cadastroNavigation: MenuItem[] = [
   { name: "Produto", href: "/produtos", icon: Package },
 ];
 
-const configuracoesNavigation: MenuItem[] = [{ name: "Tipo de veiculo", href: "/tipos-veiculo", icon: CarFront }];
+const configuracoesNavigation: MenuItem[] = [{ name: "Tipo de veículo", href: "/tipos-veiculo", icon: CarFront }];
 
 function getInitials(fullName?: string) {
   if (!fullName) return "U";

@@ -130,10 +130,11 @@ export default function NovoGrupoEmpresarialPage() {
 
   return (
     <div className="space-y-6">
-      <div className="flex items-center gap-4">
+      <div className="flex flex-col items-start justify-between gap-4 sm:flex-row">
+        <div className="flex items-center gap-4">
         <Link href="/grupos-empresariais">
-          <Button variant="ghost" size="sm">
-            <ArrowLeft className="h-4 w-4 mr-2" />
+          <Button size="sm" className="btn-primary-custom">
+            <ArrowLeft className="mr-2 h-4 w-4" />
             Voltar
           </Button>
         </Link>
@@ -142,16 +143,18 @@ export default function NovoGrupoEmpresarialPage() {
           <h1 className="text-2xl font-bold text-gray-900">Novo Grupo Empresarial</h1>
           <p className="text-gray-600">Cadastre um novo grupo</p>
         </div>
+        </div>
+        <div />
       </div>
 
       <form onSubmit={handleSubmit}>
         <Card>
-          <CardHeader>
+          <CardHeader className="space-y-1">
             <CardTitle>Informações</CardTitle>
           </CardHeader>
 
           <CardContent className="space-y-4">
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
               <div>
                 <div className="flex items-end justify-between">
                   <Label htmlFor="descricao">Descrição *</Label>
@@ -168,6 +171,7 @@ export default function NovoGrupoEmpresarialPage() {
                   required
                   disabled={loading}
                   maxLength={MAX_DESCRICAO}
+                  className="h-10 border-gray-200 bg-white shadow-sm"
                 />
               </div>
 
@@ -188,23 +192,25 @@ export default function NovoGrupoEmpresarialPage() {
                   required
                   disabled={loading}
                   maxLength={MAX_CNPJ}
+                  className="h-10 border-gray-200 bg-white shadow-sm"
                 />
               </div>
             </div>
 
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
               <div>
                 <Label htmlFor="ativo">Status</Label>
                 <Select
                   value={formData.ativo ? "true" : "false"}
                   onValueChange={(value) => setFormData((prev) => ({ ...prev, ativo: value === "true" }))}
+                  disabled={loading}
                 >
-                  <SelectTrigger>
+                  <SelectTrigger id="ativo" className="h-10 border-orange-200 bg-white shadow-sm focus:border-orange-400 focus:ring-orange-500">
                     <SelectValue />
                   </SelectTrigger>
                   <SelectContent>
-                    <SelectItem value="true">Ativo</SelectItem>
-                    <SelectItem value="false">Inativo</SelectItem>
+                    <SelectItem value="true" className="focus:bg-orange-50 focus:text-orange-700 data-[highlighted]:bg-orange-50 data-[highlighted]:text-orange-700">Ativo</SelectItem>
+                    <SelectItem value="false" className="focus:bg-orange-50 focus:text-orange-700 data-[highlighted]:bg-orange-50 data-[highlighted]:text-orange-700">Inativo</SelectItem>
                   </SelectContent>
                 </Select>
               </div>
@@ -212,17 +218,17 @@ export default function NovoGrupoEmpresarialPage() {
           </CardContent>
         </Card>
 
-        <div className="flex justify-end space-x-4 pt-6">
+        <div className="flex justify-end gap-4 pt-6">
           <Link href="/grupos-empresariais">
-            <Button type="button" variant="outline" disabled={loading}>
-              <X className="h-4 w-4 mr-2" />
+            <Button type="button" className="btn-primary-custom" disabled={loading}>
+              <X className="mr-2 h-4 w-4" />
               Cancelar
             </Button>
           </Link>
 
-          <Button type="submit" className="dental-primary" disabled={loading}>
-            {loading ? <Loader2 className="h-4 w-4 mr-2 animate-spin" /> : <Save className="h-4 w-4 mr-2" />}
-            Criar
+          <Button type="submit" className="btn-primary-custom" disabled={loading}>
+            {loading ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <Save className="mr-2 h-4 w-4" />}
+            Criar grupo
           </Button>
         </div>
       </form>

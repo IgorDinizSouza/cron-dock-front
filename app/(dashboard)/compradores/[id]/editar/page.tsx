@@ -14,6 +14,8 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { useToast } from "@/hooks/use-toast"
 import { compradorApi, type CompradorStatus } from "@/lib/comprador"
 
+const COMPRADOR_DESCRICAO_MAX = 120
+
 type FormState = { descricao: string; status: CompradorStatus }
 
 export default function EditarCompradorPage() {
@@ -55,6 +57,14 @@ export default function EditarCompradorPage() {
       toast({ title: "Erro", description: "Descrição é obrigatória.", variant: "destructive" })
       return
     }
+    if (formData.descricao.trim().length > COMPRADOR_DESCRICAO_MAX) {
+      toast({
+        title: "Erro",
+        description: `Descricao deve ter no maximo ${COMPRADOR_DESCRICAO_MAX} caracteres.`,
+        variant: "destructive",
+      })
+      return
+    }
     try {
       setLoading(true)
       await compradorApi.update(compradorId, { descricao: formData.descricao.trim(), status: formData.status })
@@ -93,7 +103,7 @@ export default function EditarCompradorPage() {
             <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
               <div>
                 <Label htmlFor="descricao">Descrição *</Label>
-                <Input id="descricao" value={formData.descricao} onChange={(e) => setFormData((p) => ({ ...p, descricao: e.target.value }))} className="h-10 border-gray-200 bg-white shadow-sm" disabled={loading} />
+                <Input id="descricao" value={formData.descricao} onChange={(e) => setFormData((p) => ({ ...p, descricao: e.target.value }))} className="h-10 border-gray-200 bg-white shadow-sm" disabled={loading} maxLength={COMPRADOR_DESCRICAO_MAX} />
               </div>
               <div>
                 <Label htmlFor="status">Status</Label>
@@ -120,4 +130,3 @@ export default function EditarCompradorPage() {
     </div>
   )
 }
-

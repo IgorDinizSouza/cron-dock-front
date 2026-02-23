@@ -37,6 +37,13 @@ function novaEmbalagem(): EmbalagemForm {
   }
 }
 
+const PRODUTO_LIMITES = {
+  descricao: 200,
+  complemento: 200,
+  peso: 30,
+  pesoLiquido: 30,
+} as const
+
 type FormState = {
   id: string
   descricao: string
@@ -144,6 +151,22 @@ export default function EditarProdutoPage() {
       toast({ title: "Erro", description: "Descrição é obrigatória.", variant: "destructive" })
       return
     }
+    if (formData.descricao.trim().length > PRODUTO_LIMITES.descricao) {
+      toast({ title: "Erro", description: `Descricao deve ter no maximo ${PRODUTO_LIMITES.descricao} caracteres.`, variant: "destructive" })
+      return
+    }
+    if (formData.complemento.trim().length > PRODUTO_LIMITES.complemento) {
+      toast({ title: "Erro", description: `Complemento deve ter no maximo ${PRODUTO_LIMITES.complemento} caracteres.`, variant: "destructive" })
+      return
+    }
+    if (formData.peso.trim().length > PRODUTO_LIMITES.peso) {
+      toast({ title: "Erro", description: `Peso deve ter no maximo ${PRODUTO_LIMITES.peso} caracteres.`, variant: "destructive" })
+      return
+    }
+    if (formData.pesoLiquido.trim().length > PRODUTO_LIMITES.pesoLiquido) {
+      toast({ title: "Erro", description: `Peso liquido deve ter no maximo ${PRODUTO_LIMITES.pesoLiquido} caracteres.`, variant: "destructive" })
+      return
+    }
 
     try {
       setLoading(true)
@@ -221,6 +244,7 @@ export default function EditarProdutoPage() {
                   onChange={(e) => setFormData((p) => ({ ...p, descricao: e.target.value }))}
                   className="h-10 border-gray-200 bg-white shadow-sm"
                   disabled={loading}
+                  maxLength={PRODUTO_LIMITES.descricao}
                 />
               </div>
             </div>
@@ -259,6 +283,7 @@ export default function EditarProdutoPage() {
                   onChange={(e) => setFormData((p) => ({ ...p, complemento: e.target.value }))}
                   className="h-10 border-gray-200 bg-white shadow-sm"
                   disabled={loading}
+                  maxLength={PRODUTO_LIMITES.complemento}
                 />
               </div>
             </div>
@@ -274,11 +299,11 @@ export default function EditarProdutoPage() {
               </div>
               <div>
                 <Label htmlFor="peso">Peso</Label>
-                <Input id="peso" value={formData.peso} onChange={(e) => setFormData((p) => ({ ...p, peso: e.target.value }))} className="h-10 border-gray-200 bg-white shadow-sm" disabled={loading} />
+                <Input id="peso" value={formData.peso} onChange={(e) => setFormData((p) => ({ ...p, peso: e.target.value }))} className="h-10 border-gray-200 bg-white shadow-sm" disabled={loading} maxLength={PRODUTO_LIMITES.peso} />
               </div>
               <div>
                 <Label htmlFor="pesoLiquido">Peso líquido</Label>
-                <Input id="pesoLiquido" value={formData.pesoLiquido} onChange={(e) => setFormData((p) => ({ ...p, pesoLiquido: e.target.value }))} className="h-10 border-gray-200 bg-white shadow-sm" disabled={loading} />
+                <Input id="pesoLiquido" value={formData.pesoLiquido} onChange={(e) => setFormData((p) => ({ ...p, pesoLiquido: e.target.value }))} className="h-10 border-gray-200 bg-white shadow-sm" disabled={loading} maxLength={PRODUTO_LIMITES.pesoLiquido} />
               </div>
             </div>
 

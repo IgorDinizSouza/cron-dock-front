@@ -14,6 +14,9 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { useToast } from "@/hooks/use-toast"
 import { roleApi } from "@/lib/perfil"
 
+const ROLE_NOME_MAX = 100
+const ROLE_DESCRICAO_MAX = 100
+
 export default function NovaRolePage() {
   const router = useRouter()
   const { toast } = useToast()
@@ -26,6 +29,18 @@ export default function NovaRolePage() {
     e.preventDefault()
     if (!nome.trim()) {
       toast({ title: "Erro", description: "Nome e obrigatorio.", variant: "destructive" })
+      return
+    }
+    if (nome.trim().length > ROLE_NOME_MAX) {
+      toast({ title: "Erro", description: `Nome deve ter no maximo ${ROLE_NOME_MAX} caracteres.`, variant: "destructive" })
+      return
+    }
+    if (descricao.trim().length > ROLE_DESCRICAO_MAX) {
+      toast({
+        title: "Erro",
+        description: `Descricao deve ter no maximo ${ROLE_DESCRICAO_MAX} caracteres.`,
+        variant: "destructive",
+      })
       return
     }
     try {
@@ -80,6 +95,7 @@ export default function NovaRolePage() {
                   value={nome}
                   onChange={(e) => setNome(e.target.value)}
                   disabled={loading}
+                  maxLength={ROLE_NOME_MAX}
                   className="h-10 border-gray-200 bg-white shadow-sm"
                 />
               </div>
@@ -114,11 +130,12 @@ export default function NovaRolePage() {
               <Label htmlFor="descricao">Descricao</Label>
               <Input
                 id="descricao"
-                value={descricao}
-                onChange={(e) => setDescricao(e.target.value)}
-                disabled={loading}
-                className="h-10 border-gray-200 bg-white shadow-sm"
-              />
+                  value={descricao}
+                  onChange={(e) => setDescricao(e.target.value)}
+                  disabled={loading}
+                  maxLength={ROLE_DESCRICAO_MAX}
+                  className="h-10 border-gray-200 bg-white shadow-sm"
+                />
             </div>
           </CardContent>
         </Card>
@@ -139,4 +156,3 @@ export default function NovaRolePage() {
     </div>
   )
 }
-

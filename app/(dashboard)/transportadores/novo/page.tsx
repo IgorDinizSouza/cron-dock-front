@@ -14,6 +14,9 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { useToast } from "@/hooks/use-toast"
 import { transportadorApi, type TransportadorStatus } from "@/lib/transportador"
 
+const TRANSPORTADOR_DESCRICAO_MAX = 150
+const TRANSPORTADOR_CNPJ_MAX = 20
+
 export default function NovoTransportadorPage() {
   const router = useRouter()
   const { toast } = useToast()
@@ -32,6 +35,23 @@ export default function NovoTransportadorPage() {
     }
     if (!cnpj.trim()) {
       toast({ title: "Erro", description: "CNPJ é obrigatório.", variant: "destructive" })
+      return
+    }
+
+    if (descricao.trim().length > TRANSPORTADOR_DESCRICAO_MAX) {
+      toast({
+        title: "Erro",
+        description: `Descricao deve ter no maximo ${TRANSPORTADOR_DESCRICAO_MAX} caracteres.`,
+        variant: "destructive",
+      })
+      return
+    }
+    if (cnpj.trim().length > TRANSPORTADOR_CNPJ_MAX) {
+      toast({
+        title: "Erro",
+        description: `CNPJ deve ter no maximo ${TRANSPORTADOR_CNPJ_MAX} caracteres.`,
+        variant: "destructive",
+      })
       return
     }
 
@@ -87,6 +107,7 @@ export default function NovoTransportadorPage() {
                   value={descricao}
                   onChange={(e) => setDescricao(e.target.value)}
                   disabled={loading}
+                  maxLength={TRANSPORTADOR_DESCRICAO_MAX}
                   className="h-10 border-gray-200 bg-white shadow-sm"
                 />
               </div>
@@ -97,6 +118,7 @@ export default function NovoTransportadorPage() {
                   value={cnpj}
                   onChange={(e) => setCnpj(e.target.value)}
                   disabled={loading}
+                  maxLength={TRANSPORTADOR_CNPJ_MAX}
                   className="h-10 border-gray-200 bg-white shadow-sm"
                 />
               </div>
@@ -142,4 +164,3 @@ export default function NovoTransportadorPage() {
     </div>
   )
 }
-

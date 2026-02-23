@@ -6,6 +6,7 @@ import { useRouter } from "next/navigation"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { Plus, Pencil, Search, Eraser } from "lucide-react"
 import { useToast } from "@/hooks/use-toast"
 import { grupoEmpresarialApi, type GrupoEmpresarialResponse as GrupoEmpresa } from "@/lib/grupoempresarial"
@@ -66,7 +67,7 @@ export default function GrupoEmpresaPage() {
     <div className="space-y-6">
       <div className="flex flex-col items-start justify-between gap-4 sm:flex-row">
         <div>
-          <h1 className="text-2xl font-bold text-gray-900">Grupo Empresarial</h1>
+          <h1 className="text-2xl font-bold text-gray-900">Grupos empresariais</h1>
           <p className="text-gray-600">Cadastro e gerenciamento de grupos</p>
         </div>
         <div />
@@ -98,18 +99,22 @@ export default function GrupoEmpresaPage() {
                 placeholder="CNPJ"
                 disabled={loading}
               />
-              <div>
-                <select
-                  value={ativoFilter}
-                  onChange={(e) => setAtivoFilter(e.target.value)}
-                  className="border-input h-10 w-full rounded-md border border-gray-200 bg-white px-2 py-2 shadow-sm"
-                  disabled={loading}
-                >
-                  <option value="">Todos</option>
-                  <option value="ativo">Ativo</option>
-                  <option value="inativo">Inativo</option>
-                </select>
-              </div>
+              <Select value={ativoFilter || "__all__"} onValueChange={(value) => setAtivoFilter(value === "__all__" ? "" : value)}>
+                <SelectTrigger className="h-10 border-orange-200 bg-white shadow-sm focus:border-orange-400 focus:ring-orange-500" disabled={loading}>
+                  <SelectValue placeholder="Status" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="__all__" className="focus:bg-orange-50 focus:text-orange-700 data-[highlighted]:bg-orange-50 data-[highlighted]:text-orange-700">
+                    Todos
+                  </SelectItem>
+                  <SelectItem value="ativo" className="focus:bg-orange-50 focus:text-orange-700 data-[highlighted]:bg-orange-50 data-[highlighted]:text-orange-700">
+                    Ativo
+                  </SelectItem>
+                  <SelectItem value="inativo" className="focus:bg-orange-50 focus:text-orange-700 data-[highlighted]:bg-orange-50 data-[highlighted]:text-orange-700">
+                    Inativo
+                  </SelectItem>
+                </SelectContent>
+              </Select>
             </div>
 
             <div className="flex items-center gap-2">
@@ -146,7 +151,7 @@ export default function GrupoEmpresaPage() {
 
       <Card>
         <CardHeader>
-          <CardTitle>Grupo Empresarial ({filtered.length})</CardTitle>
+          <CardTitle>Grupos empresariais ({filtered.length})</CardTitle>
         </CardHeader>
         <CardContent>
           {loading ? (

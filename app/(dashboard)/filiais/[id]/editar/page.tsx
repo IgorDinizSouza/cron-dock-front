@@ -29,6 +29,17 @@ type FormState = {
   status: FilialStatus
 }
 
+const LIMITES = {
+  descricao: 120,
+  cnpj: 50,
+  endereco: 255,
+  bairro: 120,
+  codigoIbgeCidade: 20,
+  uf: 2,
+  cep: 20,
+  descricaoRegional: 200,
+} as const
+
 function toNullableNumber(value: string): number | null {
   const trimmed = value.trim()
   if (!trimmed) return null
@@ -136,6 +147,39 @@ export default function EditarFilialPage() {
       return
     }
 
+    if (formData.descricao.trim().length > LIMITES.descricao) {
+      toast({ title: "Erro", description: `Descricao deve ter no maximo ${LIMITES.descricao} caracteres.`, variant: "destructive" })
+      return
+    }
+    if (formData.cnpj.trim().length > LIMITES.cnpj) {
+      toast({ title: "Erro", description: `CNPJ deve ter no maximo ${LIMITES.cnpj} caracteres.`, variant: "destructive" })
+      return
+    }
+    if (formData.endereco.trim().length > LIMITES.endereco) {
+      toast({ title: "Erro", description: `Endereco deve ter no maximo ${LIMITES.endereco} caracteres.`, variant: "destructive" })
+      return
+    }
+    if (formData.bairro.trim().length > LIMITES.bairro) {
+      toast({ title: "Erro", description: `Bairro deve ter no maximo ${LIMITES.bairro} caracteres.`, variant: "destructive" })
+      return
+    }
+    if (formData.codigoIbgeCidade.trim().length > LIMITES.codigoIbgeCidade) {
+      toast({ title: "Erro", description: `Codigo IBGE da cidade deve ter no maximo ${LIMITES.codigoIbgeCidade} caracteres.`, variant: "destructive" })
+      return
+    }
+    if (formData.cep.trim().length > LIMITES.cep) {
+      toast({ title: "Erro", description: `CEP deve ter no maximo ${LIMITES.cep} caracteres.`, variant: "destructive" })
+      return
+    }
+    if (formData.descricaoRegional.trim().length > LIMITES.descricaoRegional) {
+      toast({ title: "Erro", description: `Descricao regional deve ter no maximo ${LIMITES.descricaoRegional} caracteres.`, variant: "destructive" })
+      return
+    }
+    if (formData.uf.trim().length > LIMITES.uf) {
+      toast({ title: "Erro", description: `UF deve ter no maximo ${LIMITES.uf} caracteres.`, variant: "destructive" })
+      return
+    }
+
     try {
       setLoading(true)
       await filialApi.update(filialId, buildPayload(formData))
@@ -182,26 +226,26 @@ export default function EditarFilialPage() {
             <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
               <div>
                 <Label htmlFor="descricao">Descrição *</Label>
-                <Input id="descricao" value={formData.descricao} onChange={(e) => setFormData((p) => ({ ...p, descricao: e.target.value }))} className="h-10 border-gray-200 bg-white shadow-sm" disabled={loading} />
+                <Input id="descricao" value={formData.descricao} onChange={(e) => setFormData((p) => ({ ...p, descricao: e.target.value }))} className="h-10 border-gray-200 bg-white shadow-sm" disabled={loading} maxLength={LIMITES.descricao} />
               </div>
               <div>
                 <Label htmlFor="cnpj">CNPJ *</Label>
-                <Input id="cnpj" value={formData.cnpj} onChange={(e) => setFormData((p) => ({ ...p, cnpj: e.target.value }))} className="h-10 border-gray-200 bg-white shadow-sm" disabled={loading} />
+                <Input id="cnpj" value={formData.cnpj} onChange={(e) => setFormData((p) => ({ ...p, cnpj: e.target.value }))} className="h-10 border-gray-200 bg-white shadow-sm" disabled={loading} maxLength={LIMITES.cnpj} />
               </div>
             </div>
 
             <div className="grid grid-cols-1 gap-4 md:grid-cols-3">
               <div>
                 <Label htmlFor="endereco">Endereço</Label>
-                <Input id="endereco" value={formData.endereco} onChange={(e) => setFormData((p) => ({ ...p, endereco: e.target.value }))} className="h-10 border-gray-200 bg-white shadow-sm" disabled={loading} />
+                <Input id="endereco" value={formData.endereco} onChange={(e) => setFormData((p) => ({ ...p, endereco: e.target.value }))} className="h-10 border-gray-200 bg-white shadow-sm" disabled={loading} maxLength={LIMITES.endereco} />
               </div>
               <div>
                 <Label htmlFor="bairro">Bairro</Label>
-                <Input id="bairro" value={formData.bairro} onChange={(e) => setFormData((p) => ({ ...p, bairro: e.target.value }))} className="h-10 border-gray-200 bg-white shadow-sm" disabled={loading} />
+                <Input id="bairro" value={formData.bairro} onChange={(e) => setFormData((p) => ({ ...p, bairro: e.target.value }))} className="h-10 border-gray-200 bg-white shadow-sm" disabled={loading} maxLength={LIMITES.bairro} />
               </div>
               <div>
                 <Label htmlFor="codigoIbgeCidade">Código IBGE da cidade</Label>
-                <Input id="codigoIbgeCidade" value={formData.codigoIbgeCidade} onChange={(e) => setFormData((p) => ({ ...p, codigoIbgeCidade: e.target.value }))} className="h-10 border-gray-200 bg-white shadow-sm" disabled={loading} />
+                <Input id="codigoIbgeCidade" value={formData.codigoIbgeCidade} onChange={(e) => setFormData((p) => ({ ...p, codigoIbgeCidade: e.target.value }))} className="h-10 border-gray-200 bg-white shadow-sm" disabled={loading} maxLength={LIMITES.codigoIbgeCidade} />
               </div>
             </div>
 
@@ -212,7 +256,7 @@ export default function EditarFilialPage() {
               </div>
               <div>
                 <Label htmlFor="cep">CEP</Label>
-                <Input id="cep" value={formData.cep} onChange={(e) => setFormData((p) => ({ ...p, cep: e.target.value }))} className="h-10 border-gray-200 bg-white shadow-sm" disabled={loading} />
+                <Input id="cep" value={formData.cep} onChange={(e) => setFormData((p) => ({ ...p, cep: e.target.value }))} className="h-10 border-gray-200 bg-white shadow-sm" disabled={loading} maxLength={LIMITES.cep} />
               </div>
               <div>
                 <Label htmlFor="cd">CD</Label>
@@ -231,7 +275,7 @@ export default function EditarFilialPage() {
               </div>
               <div className="md:col-span-2">
                 <Label htmlFor="descricaoRegional">Descrição regional</Label>
-                <Input id="descricaoRegional" value={formData.descricaoRegional} onChange={(e) => setFormData((p) => ({ ...p, descricaoRegional: e.target.value }))} className="h-10 border-gray-200 bg-white shadow-sm" disabled={loading} />
+                <Input id="descricaoRegional" value={formData.descricaoRegional} onChange={(e) => setFormData((p) => ({ ...p, descricaoRegional: e.target.value }))} className="h-10 border-gray-200 bg-white shadow-sm" disabled={loading} maxLength={LIMITES.descricaoRegional} />
               </div>
             </div>
 
@@ -266,4 +310,3 @@ export default function EditarFilialPage() {
     </div>
   )
 }
-

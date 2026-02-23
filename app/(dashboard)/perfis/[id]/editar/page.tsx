@@ -15,6 +15,8 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { useToast } from "@/hooks/use-toast"
 import { perfilApi, roleApi, type RoleResponse } from "@/lib/perfil"
 
+const PERFIL_DESCRICAO_MAX = 100
+
 type FormState = {
   descricao: string
   ativo: boolean
@@ -101,6 +103,14 @@ export default function EditarPerfilPage() {
       toast({ title: "Erro", description: "Descricao e obrigatoria.", variant: "destructive" })
       return
     }
+    if (formData.descricao.trim().length > PERFIL_DESCRICAO_MAX) {
+      toast({
+        title: "Erro",
+        description: `Descricao deve ter no maximo ${PERFIL_DESCRICAO_MAX} caracteres.`,
+        variant: "destructive",
+      })
+      return
+    }
 
     try {
       setLoading(true)
@@ -158,6 +168,7 @@ export default function EditarPerfilPage() {
                   id="descricao"
                   value={formData.descricao}
                   onChange={(e) => setFormData((prev) => ({ ...prev, descricao: e.target.value }))}
+                  maxLength={PERFIL_DESCRICAO_MAX}
                   className="h-10 border-gray-200 bg-white shadow-sm"
                 />
               </div>
@@ -226,4 +237,3 @@ export default function EditarPerfilPage() {
     </div>
   )
 }
-

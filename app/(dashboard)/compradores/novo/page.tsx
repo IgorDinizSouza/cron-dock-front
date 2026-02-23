@@ -14,6 +14,8 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { useToast } from "@/hooks/use-toast"
 import { compradorApi, type CompradorStatus } from "@/lib/comprador"
 
+const COMPRADOR_DESCRICAO_MAX = 120
+
 export default function NovoCompradorPage() {
   const router = useRouter()
   const { toast } = useToast()
@@ -25,6 +27,14 @@ export default function NovoCompradorPage() {
     e.preventDefault()
     if (!descricao.trim()) {
       toast({ title: "Erro", description: "Descrição é obrigatória.", variant: "destructive" })
+      return
+    }
+    if (descricao.trim().length > COMPRADOR_DESCRICAO_MAX) {
+      toast({
+        title: "Erro",
+        description: `Descricao deve ter no maximo ${COMPRADOR_DESCRICAO_MAX} caracteres.`,
+        variant: "destructive",
+      })
       return
     }
     try {
@@ -63,7 +73,7 @@ export default function NovoCompradorPage() {
             <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
               <div>
                 <Label htmlFor="descricao">Descrição *</Label>
-                <Input id="descricao" value={descricao} onChange={(e) => setDescricao(e.target.value)} className="h-10 border-gray-200 bg-white shadow-sm" disabled={loading} />
+                <Input id="descricao" value={descricao} onChange={(e) => setDescricao(e.target.value)} className="h-10 border-gray-200 bg-white shadow-sm" disabled={loading} maxLength={COMPRADOR_DESCRICAO_MAX} />
               </div>
               <div>
                 <Label htmlFor="status">Status</Label>
@@ -90,4 +100,3 @@ export default function NovoCompradorPage() {
     </div>
   )
 }
-

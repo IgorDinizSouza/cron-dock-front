@@ -1,6 +1,22 @@
 import { getConsultorioIdFromToken, clearAuth } from "./auth"
 
-export const API_BASE_URL = "http://localhost:8081/api";
+const API_BASE_URL_BY_PROFILE = {
+  dev: "http://localhost:8081/api",
+  homologacao: "https://cron-dock-bff.onrender.com",
+} as const
+
+type ApiProfile = keyof typeof API_BASE_URL_BY_PROFILE
+
+function resolveApiBaseUrl(): string {
+  const explicit = process.env.NEXT_PUBLIC_API_BASE_URL?.trim()
+  if (explicit) return explicit.replace(/\/+$/, "")
+
+  const profile = (process.env.NEXT_PUBLIC_APP_PROFILE?.trim().toLowerCase() || "dev") as ApiProfile
+  const url = API_BASE_URL_BY_PROFILE[profile] || API_BASE_URL_BY_PROFILE.dev
+  return url.replace(/\/+$/, "")
+}
+
+export const API_BASE_URL = resolveApiBaseUrl()
 
 
 function handleUnauthorized(status: number) {
@@ -154,33 +170,6 @@ function toPage<T>(arr: T[]): Page<T> {
   }
 }
 
-export const patientsApi = {
-  create: (data: any) =>
-    apiRequest("/pacientes", {
-      method: "POST",
-      body: JSON.stringify({ ...data, consultorioId: getCurrentConsultorioId() }),
-    }),
-
-  getAll: () => apiRequest(`/pacientes?consultorioId=${getCurrentConsultorioId()}`, { method: "GET" }),
-
-  getById: (id: string) => apiRequest(`/pacientes/${id}`, { method: "GET" }),
-
-  update: (id: string, data: any) =>
-    apiRequest(`/pacientes/${id}`, {
-      method: "PUT",
-      body: JSON.stringify({ ...data, consultorioId: getCurrentConsultorioId() }),
-    }),
-
-  delete: (id: string) => apiRequest(`/pacientes/${id}`, { method: "DELETE" }),
-
-  search: (query: string) =>
-    apiRequest(`/pacientes/buscar?q=${encodeURIComponent(query)}&consultorioId=${getCurrentConsultorioId()}`, {
-      method: "GET",
-    }),
-
-  export: () => apiRequest(`/pacientes/export?consultorioId=${getCurrentConsultorioId()}`, { method: "GET" }),
-}
-
 export const appointmentsApi = {
   create: (data: any) =>
     apiRequest("/agendamentos", {
@@ -211,94 +200,6 @@ export const appointmentsApi = {
       `/agendamentos/${id}/status?status=${encodeURIComponent(status)}&consultorioId=${getCurrentConsultorioId()}`,
       { method: "PATCH" },
     ),
-}
-
-export const proceduresApi = {
-  create: (data: any) =>
-    apiRequest("/procedimentos", {
-      method: "POST",
-      body: JSON.stringify({ ...data, consultorioId: getCurrentConsultorioId() }),
-    }),
-
-  getAll: (page = 0, size = 12, search = "") =>
-    apiRequest<Page<any>>(
-      `/procedimentos?page=${page}&size=${size}${
-        search ? `&search=${encodeURIComponent(search)}` : ""
-      }&consultorioId=${getCurrentConsultorioId()}`,
-      { method: "GET" },
-    ),
-
-  listAll: async (maxPages = 20, size = 200, search = "") => {
-    let page = 0
-    const all: any[] = []
-    while (page < maxPages) {
-      const resp = await proceduresApi.getAll(page, size, search)
-      const items = Array.isArray(resp?.content) ? resp.content : []
-      all.push(...items)
-      if (resp?.last || page + 1 >= (resp?.totalPages ?? 0)) break
-      page += 1
-    }
-    return all
-  },
-
-  getById: (id: string | number) =>
-    apiRequest(`/procedimentos/${id}?consultorioId=${getCurrentConsultorioId()}`, { method: "GET" }),
-
-  update: (id: string | number, data: any) =>
-    apiRequest(`/procedimentos/${id}`, {
-      method: "PUT",
-      body: JSON.stringify({ ...data, consultorioId: getCurrentConsultorioId() }),
-    }),
-
-  delete: (id: string | number) =>
-    apiRequest(`/procedimentos/${id}?consultorioId=${getCurrentConsultorioId()}`, { method: "DELETE" }),
-
-  getBySpecialty: (especialidade: string) =>
-    apiRequest<any[]>(
-      `/procedimentos/especialidade/${encodeURIComponent(especialidade)}?consultorioId=${getCurrentConsultorioId()}`,
-      { method: "GET" },
-    ),
-
-  getByEspecialidade: (especialidadeId: string) =>
-    apiRequest<any[]>(
-      `/procedimentos/especialidade/${encodeURIComponent(especialidadeId)}?consultorioId=${getCurrentConsultorioId()}`,
-      { method: "GET" },
-    ),
-}
-
-export const dentistasApi = {
-  create: (data: any) =>
-    apiRequest("/dentistas", {
-      method: "POST",
-      body: JSON.stringify({ ...data, consultorioId: getCurrentConsultorioId() }),
-    }),
-
-  getAll: (page = 0, size = 10, search = "") =>
-    apiRequest<Page<any>>(
-      `/dentistas?page=${page}&size=${size}${
-        search ? `&search=${encodeURIComponent(search)}` : ""
-      }&consultorioId=${getCurrentConsultorioId()}`,
-      { method: "GET" },
-    ),
-
-  getById: (id: string | number) =>
-    apiRequest(`/dentistas/${id}?consultorioId=${getCurrentConsultorioId()}`, { method: "GET" }),
-
-  update: (id: string | number, data: any) =>
-    apiRequest(`/dentistas/${id}`, {
-      method: "PUT",
-      body: JSON.stringify({ ...data, consultorioId: getCurrentConsultorioId() }), // <<< FIX
-    }),
-
-  delete: (id: string | number) =>
-    apiRequest(`/dentistas/${id}?consultorioId=${getCurrentConsultorioId()}`, { method: "DELETE" }),
-
-  toggleStatus: (id: string | number, ativo: boolean) =>
-    apiRequest(`/dentistas/${id}/status?ativo=${ativo}&consultorioId=${getCurrentConsultorioId()}`, {
-      method: "PATCH",
-    }),
-
-  export: () => apiRequest(`/dentistas/export?consultorioId=${getCurrentConsultorioId()}`, { method: "GET" }),
 }
 
 export const authApi = {
@@ -529,54 +430,6 @@ export const financeApi = {
       { method: "GET" },
     )
   },
-}
-
-export const especialidadesApi = {
-  create: (data: any) =>
-    apiRequest("/especialidades", {
-      method: "POST",
-      body: JSON.stringify({
-        nome: data?.nome,
-        descricao: data?.descricao,
-        ativo: data?.ativo,
-        consultorioId: getCurrentConsultorioId(),
-      }),
-    }),
-
-  getAll: async (page = 0, size = 12, search = ""): Promise<Page<any>> => {
-    const qs =
-      `?page=${page}&size=${size}&consultorioId=${getCurrentConsultorioId()}` +
-      (search ? `&search=${encodeURIComponent(search)}` : "")
-    const data = await apiRequest<any>(`/especialidades${qs}`, { method: "GET" })
-
-    if (Array.isArray(data)) {
-      return toPage<any>(data)
-    }
-    if (data && typeof data === "object" && Array.isArray((data as any).content)) {
-      return data as Page<any>
-    }
-    return toPage<any>([])
-  },
-
-  getById: (id: string | number) =>
-    apiRequest(`/especialidades/${id}?consultorioId=${getCurrentConsultorioId()}`, { method: "GET" }),
-
-  update: (id: string | number, data: any) =>
-    apiRequest(`/especialidades/${id}`, {
-      method: "PUT",
-      body: JSON.stringify({
-        nome: data?.nome,
-        descricao: data?.descricao,
-        ativo: data?.ativo,
-        consultorioId: getCurrentConsultorioId(),
-      }),
-    }),
-
-  delete: (id: string | number) =>
-    apiRequest(`/especialidades/${id}?consultorioId=${getCurrentConsultorioId()}`, { method: "DELETE" }),
-
-  listActive: () =>
-    apiRequest<any[]>(`/especialidades/ativas?consultorioId=${getCurrentConsultorioId()}`, { method: "GET" }),
 }
 
 export const usuariosApi = {

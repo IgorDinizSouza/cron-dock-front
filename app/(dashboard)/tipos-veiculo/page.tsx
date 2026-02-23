@@ -68,8 +68,8 @@ export default function TiposVeiculoPage() {
     <div className="space-y-6">
       <div className="flex flex-col items-start justify-between gap-4 sm:flex-row">
         <div>
-          <h1 className="text-2xl font-bold text-gray-900">Tipos de veículo</h1>
-          <p className="text-gray-600">Configuração dos tipos de veículo utilizados no sistema</p>
+          <h1 className="text-2xl font-bold text-gray-900">Tipo de veículo</h1>
+          <p className="text-gray-600">Configuração dos tipo de veículo utilizados no sistema</p>
         </div>
         <div />
       </div>
@@ -126,11 +126,11 @@ export default function TiposVeiculoPage() {
 
       <Card>
         <CardHeader>
-          <CardTitle>Tipos de veículo ({filtered.length})</CardTitle>
+          <CardTitle>Tipo de veículo ({filtered.length})</CardTitle>
         </CardHeader>
         <CardContent>
           {loading ? (
-            <div className="py-10 text-center text-gray-500">Carregando tipos de veículo...</div>
+            <div className="py-10 text-center text-gray-500">Carregando tipo de veículo...</div>
           ) : filtered.length === 0 ? (
             <div className="py-10 text-center text-gray-500">Nenhum tipo de veículo encontrado.</div>
           ) : (
