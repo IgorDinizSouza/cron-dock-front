@@ -142,6 +142,7 @@ const configuracoesSections: MenuSection[] = [
     items: [
       { name: "Motivos de Ocorrências", href: "/configuracoes/motivos/ocorrencias", icon: ClipboardList },
       { name: "Motivos de Cancelamento", href: "/configuracoes/motivos/cancelamento", icon: Ban },
+      { name: "Motivos de No Show", href: "/configuracoes/motivos/no-show", icon: X },
       { name: "Motivos de Priorização", href: "/configuracoes/motivos/priorizacao", icon: Star },
     ],
   },
