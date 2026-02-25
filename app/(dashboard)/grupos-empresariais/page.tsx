@@ -7,7 +7,7 @@ import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
-import { Plus, Pencil, Search, Eraser } from "lucide-react"
+import { Plus, Pencil, Search } from "lucide-react"
 import { useToast } from "@/hooks/use-toast"
 import { grupoEmpresarialApi, type GrupoEmpresarialResponse as GrupoEmpresa } from "@/lib/grupoempresarial"
 
@@ -122,19 +122,6 @@ export default function GrupoEmpresaPage() {
                 <Search className="mr-2 h-4 w-4" />
                 Buscar
               </Button>
-              <Button
-                onClick={() => {
-                  setCodigoFilter("")
-                  setDescricaoFilter("")
-                  setCnpjFilter("")
-                  setAtivoFilter("")
-                }}
-                className="btn-primary-custom"
-              >
-                <Eraser className="mr-2 h-4 w-4" />
-                Limpar
-              </Button>
-
               <Link href="/grupos-empresariais/novo">
                 <Button className="btn-primary-custom">
                   <Plus className="mr-2 h-4 w-4" />

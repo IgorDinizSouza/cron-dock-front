@@ -2,7 +2,7 @@
 
 import { useEffect, useMemo, useState } from "react"
 import Link from "next/link"
-import { Building2, Edit, Eraser, Plus, Search, Trash2 } from "lucide-react"
+import { Building2, Edit, Plus, Search, Trash2 } from "lucide-react"
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
@@ -143,20 +143,6 @@ export default function FornecedoresPage() {
               <Button onClick={load} disabled={loading} className="btn-primary-custom">
                 <Search className="mr-2 h-4 w-4" />
                 Buscar
-              </Button>
-              <Button
-                onClick={() => {
-                  setRazaoSocialFilter("")
-                  setCnpjFilter("")
-                  setCidadeFilter("")
-                  setUfFilter("")
-                  setStatusFilter("")
-                }}
-                className="btn-primary-custom"
-                disabled={loading}
-              >
-                <Eraser className="mr-2 h-4 w-4" />
-                Limpar
               </Button>
               <Link href="/fornecedores/novo">
                 <Button className="btn-primary-custom">

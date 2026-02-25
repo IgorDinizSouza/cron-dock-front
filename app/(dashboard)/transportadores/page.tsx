@@ -10,7 +10,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { useToast } from "@/hooks/use-toast"
 import { transportadorApi, type TransportadorResponse } from "@/lib/transportador"
 import { Badge } from "@/components/ui/badge"
-import { Edit, Eraser, Plus, Search, Trash2, Truck } from "lucide-react"
+import { Edit, Plus, Search, Trash2, Truck } from "lucide-react"
 
 export default function TransportadoresPage() {
   const router = useRouter()
@@ -124,18 +124,6 @@ export default function TransportadoresPage() {
               <Button onClick={() => load()} disabled={loading} className="btn-primary-custom">
                 <Search className="mr-2 h-4 w-4" />
                 Buscar
-              </Button>
-              <Button
-                onClick={() => {
-                  setDescricaoFilter("")
-                  setCnpjFilter("")
-                  setStatusFilter("")
-                }}
-                className="btn-primary-custom"
-                disabled={loading}
-              >
-                <Eraser className="mr-2 h-4 w-4" />
-                Limpar
               </Button>
               <Link href="/transportadores/novo">
                 <Button className="btn-primary-custom">
