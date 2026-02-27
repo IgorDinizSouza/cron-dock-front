@@ -10,7 +10,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { useToast } from "@/hooks/use-toast"
 import { usuariosApi, type UsuarioResponse } from "@/lib/usuarios"
 import { perfilApi, type PerfilResponse } from "@/lib/perfil"
-import { Edit, Eraser, Plus, Search, Trash2 } from "lucide-react"
+import { Edit, Plus, Search, Trash2 } from "lucide-react"
 
 function formatDateBR(input?: string | number | null): string {
   if (input == null || input === "") return "-"
@@ -153,18 +153,6 @@ export default function UsuariosPage() {
               <Button onClick={() => load()} disabled={loading} className="btn-primary-custom">
                 <Search className="mr-2 h-4 w-4" />
                 Buscar
-              </Button>
-              <Button
-                onClick={() => {
-                  setNomeFilter("")
-                  setEmailFilter("")
-                  setPerfilFilter("")
-                }}
-                disabled={loading}
-                className="btn-primary-custom"
-              >
-                <Eraser className="mr-2 h-4 w-4" />
-                Limpar
               </Button>
               <Link href="/usuarios/novo">
                 <Button className="btn-primary-custom">

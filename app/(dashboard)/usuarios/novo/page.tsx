@@ -65,6 +65,20 @@ export default function NovoUsuarioPage() {
   }
 
   const validate = () => {
+    if (loadingPerfis) {
+      toast({ title: "Aguarde", description: "Os perfis ainda estao sendo carregados.", variant: "destructive" })
+      return false
+    }
+
+    if (perfis.length === 0) {
+      toast({
+        title: "Perfis nao encontrados",
+        description: "Cadastre ao menos um perfil antes de criar usuarios.",
+        variant: "destructive",
+      })
+      return false
+    }
+
     const nome = formData.nome.trim()
     const email = formData.email.trim()
 
@@ -120,8 +134,7 @@ export default function NovoUsuarioPage() {
     return true
   }
 
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault()
+  const submitForm = async () => {
     if (!validate()) return
 
     const perfilSelecionado = perfis.find((item) => String(item.id) === formData.perfilId)
@@ -137,7 +150,7 @@ export default function NovoUsuarioPage() {
         perfil: perfilSelecionado?.descricao,
       })
 
-      toast({ title: "Sucesso", description: "Usuario criado com sucesso." })
+      toast({ title: "Sucesso", description: "Usuario encaminhado para a fila de aprovacao" })
       router.push("/usuarios")
     } catch (error: any) {
       toast({
@@ -148,6 +161,11 @@ export default function NovoUsuarioPage() {
     } finally {
       setLoading(false)
     }
+  }
+
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault()
+    await submitForm()
   }
 
   return (
@@ -297,7 +315,7 @@ export default function NovoUsuarioPage() {
               Cancelar
             </Button>
           </Link>
-          <Button type="submit" className="btn-primary-custom" disabled={loading || loadingPerfis || perfis.length === 0}>
+          <Button type="button" className="btn-primary-custom" disabled={loading} onClick={() => void submitForm()}>
             {loading ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <Save className="mr-2 h-4 w-4" />}
             Criar usuario
           </Button>

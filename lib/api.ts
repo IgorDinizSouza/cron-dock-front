@@ -29,7 +29,7 @@ function handleUnauthorized(status: number) {
   window.location.href = "/login"
 }
 
-type ApiRequestInit = RequestInit & { skipAuthRedirect?: boolean }
+export type ApiRequestInit = RequestInit & { skipAuthRedirect?: boolean }
 
 async function apiRequest<T>(endpoint: string, options: ApiRequestInit = {}): Promise<T> {
   const token = typeof window !== "undefined" ? localStorage.getItem("authToken") : null
@@ -245,18 +245,20 @@ export const authApi = {
 }
 
 export const api = {
-  get: (endpoint: string) => apiRequest(endpoint, { method: "GET" }),
-  post: (endpoint: string, data?: any) =>
+  get: (endpoint: string, options?: ApiRequestInit) => apiRequest(endpoint, { method: "GET", ...(options || {}) }),
+  post: (endpoint: string, data?: any, options?: ApiRequestInit) =>
     apiRequest(endpoint, {
+      ...(options || {}),
       method: "POST",
       body: data ? JSON.stringify(data) : undefined,
     }),
-  put: (endpoint: string, data?: any) =>
+  put: (endpoint: string, data?: any, options?: ApiRequestInit) =>
     apiRequest(endpoint, {
+      ...(options || {}),
       method: "PUT",
       body: data ? JSON.stringify(data) : undefined,
     }),
-  delete: (endpoint: string) => apiRequest(endpoint, { method: "DELETE" }),
+  delete: (endpoint: string, options?: ApiRequestInit) => apiRequest(endpoint, { method: "DELETE", ...(options || {}) }),
 }
 
 export const fichasApi = {

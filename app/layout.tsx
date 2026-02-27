@@ -4,6 +4,7 @@ import { Open_Sans } from "next/font/google"
 import "./globals.css"
 import { NotificationProvider } from "@/contexts/notification-context"
 import { AuthProvider } from "@/contexts/auth-context"
+import { Toaster } from "@/components/ui/toaster"
 
 const openSans = Open_Sans({
   subsets: ["latin"],
@@ -28,7 +29,8 @@ export default function RootLayout({
       <body className="font-sans bg-white text-gray-900">
         <NotificationProvider>
           <AuthProvider>
-              {children}
+            {children}
+            <Toaster />
           </AuthProvider>
         </NotificationProvider>
       </body>

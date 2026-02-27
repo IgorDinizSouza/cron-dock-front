@@ -10,10 +10,14 @@ export type UsuarioResponse = {
   id: number
   nome: string
   email: string
+  status?: string | null
   ativo?: boolean
   perfil?: string | PerfilResumo | null
   perfilId?: number | null
   perfilDescricao?: string | null
+  perfis?: PerfilResumo[]
+  grupoEmpresarialId?: number | null
+  grupoEmpresarialDescricao?: string | null
   dataCriacao?: string | number | null
   createdAt?: string | number | null
   created_at?: string | number | null
@@ -29,6 +33,24 @@ export type UsuarioRequest = {
   ativo?: boolean
   perfilId?: number
   perfil?: string
+}
+
+export type UsuarioAprovacaoRequest = {
+  idUsuarioAprovador: number
+  idStatusAprovacaoUsuario: 2 | 3
+  motivoRecusa?: string
+}
+
+export type UsuarioAprovacaoResponse = {
+  id?: number | null
+  idUsuarioSolicitante?: number | null
+  idUsuarioAprovador?: number | null
+  idStatusAprovacaoUsuario?: number | null
+  descricaoStatusAprovacaoUsuario?: string | null
+  motivoRecusa?: string | null
+  dataSolicitacao?: string | null
+  dataAprovacao?: string | null
+  mensagem?: string | null
 }
 
 const V1_BASE = "/v1/usuario"
@@ -103,6 +125,7 @@ function normalizeUsuario(raw: any): UsuarioResponse {
     id: Number(raw?.id ?? raw?.usuarioId ?? 0),
     nome: String(raw?.nome ?? raw?.descricao ?? raw?.name ?? raw?.usuario ?? ""),
     email: String(raw?.email ?? raw?.login ?? ""),
+    status: raw?.status != null ? String(raw.status) : null,
     ativo:
       typeof raw?.ativo === "boolean"
         ? raw.ativo
@@ -112,6 +135,15 @@ function normalizeUsuario(raw: any): UsuarioResponse {
     perfil: typeof raw?.perfil === "string" ? raw.perfil : perfilObj,
     perfilId: raw?.perfilId ?? raw?.perfil?.id ?? primeiroPerfil?.id ?? null,
     perfilDescricao: raw?.perfilDescricao ?? raw?.perfil?.descricao ?? raw?.perfil?.nome ?? primeiroPerfil?.descricao ?? null,
+    perfis: perfis
+      .filter((perfil: any) => perfil && typeof perfil === "object")
+      .map((perfil: any) => ({
+        id: Number(perfil.id ?? 0),
+        descricao: String(perfil.descricao ?? perfil.nome ?? ""),
+        ativo: typeof perfil.ativo === "boolean" ? perfil.ativo : undefined,
+      })),
+    grupoEmpresarialId: raw?.grupoEmpresarialId ?? null,
+    grupoEmpresarialDescricao: raw?.grupoEmpresarialDescricao ?? null,
     dataCriacao: raw?.dataCriacao ?? raw?.createdAt ?? raw?.created_at ?? null,
     createdAt: raw?.createdAt ?? null,
     created_at: raw?.created_at ?? null,
@@ -133,7 +165,7 @@ function toRequestPayload(data: Partial<UsuarioRequest>) {
     grupoEmpresarialId,
   }
 
-  if (data.nome != null) payload.nome = data.nome
+  if (data.nome != null) payload.descricao = data.nome
   if (data.email != null) payload.email = data.email
   if (data.senha != null && data.senha !== "") payload.senha = data.senha
   if (typeof data.ativo === "boolean") payload.ativo = data.ativo
@@ -180,6 +212,19 @@ export const usuariosApi = {
     const grupoEmpresarialId = encodeURIComponent(getGrupoEmpresarialId())
     const data = await api.get(`${V1_BASE}/grupo-empresarial/${grupoEmpresarialId}/${encoded}`)
     return normalizeUsuario(data)
+  },
+
+  listPendentesAprovacao: async (): Promise<UsuarioResponse[]> => {
+    const data = await api.get(`${V1_BASE}/aprovacao/pendentes`)
+    return normalizePageOrArray<any>(data).content.map(normalizeUsuario)
+  },
+
+  aprovarOuRecusar: async (
+    usuarioSolicitanteId: string | number,
+    payload: UsuarioAprovacaoRequest,
+  ): Promise<UsuarioAprovacaoResponse> => {
+    const encoded = encodeURIComponent(String(usuarioSolicitanteId))
+    return (await api.put(`${V1_BASE}/${encoded}/aprovacao`, payload, { skipAuthRedirect: true })) as UsuarioAprovacaoResponse
   },
 
   create: async (data: UsuarioRequest): Promise<UsuarioResponse> => {

@@ -29,6 +29,7 @@ export type RoleRequest = {
 }
 
 const PERFIL_BASE = "/v1/perfil"
+const ROLE_BASE = "/v1/perfil/role"
 
 function toPage<T>(arr: T[]): Page<T> {
   return {
@@ -72,7 +73,7 @@ function normalizePerfil(raw: any): PerfilResponse {
   const roles = Array.isArray(raw?.roles) ? raw.roles.map(normalizeRole) : []
   const roleIds = Array.isArray(raw?.roleIds)
     ? raw.roleIds.map((id: any) => Number(id)).filter((id: number) => Number.isFinite(id))
-    : roles.map((role) => role.id).filter((id) => Number.isFinite(id))
+    : roles.map((role: RoleResponse) => role.id).filter((id: number) => Number.isFinite(id))
 
   return {
     id: Number(raw?.id ?? 0),
@@ -83,18 +84,28 @@ function normalizePerfil(raw: any): PerfilResponse {
   }
 }
 
-function extractRolesFromPerfis(perfis: PerfilResponse[]): RoleResponse[] {
-  const byKey = new Map<string, RoleResponse>()
-
-  for (const perfil of perfis) {
-    for (const role of perfil.roles || []) {
-      const normalized = normalizeRole(role)
-      const key = normalized.id > 0 ? `id:${normalized.id}` : `nome:${normalized.nome.toLowerCase()}`
-      if (!byKey.has(key)) byKey.set(key, normalized)
-    }
+function normalizeRolesList(data: any): RoleResponse[] {
+  if (Array.isArray(data)) return data.map(normalizeRole)
+  if (Array.isArray((data as any)?.content)) return (data as any).content.map(normalizeRole)
+  if (Array.isArray((data as any)?.items)) return (data as any).items.map(normalizeRole)
+  if (Array.isArray((data as any)?.data)) return (data as any).data.map(normalizeRole)
+  if ((data as any)?.data && typeof (data as any).data === "object") {
+    const nested = normalizePageOrArray<any>((data as any).data)
+    return (nested.content || []).map(normalizeRole)
   }
+  return []
+}
 
-  return Array.from(byKey.values())
+function toPerfilPayload(data: PerfilRequest) {
+  const roleIdsSource = Array.isArray(data.roleIds) ? data.roleIds : Array.isArray(data.roles) ? data.roles : []
+  const roleIds = roleIdsSource
+    .map((id) => Number(id))
+    .filter((id) => Number.isFinite(id))
+
+  return {
+    descricao: String(data.descricao ?? "").trim(),
+    roleIds: Array.from(new Set(roleIds)),
+  }
 }
 
 export const perfilApi = {
@@ -123,18 +134,17 @@ export const perfilApi = {
 
   getById: async (id: string | number) => normalizePerfil(await api.get(`${PERFIL_BASE}/${encodeURIComponent(String(id))}`)),
 
-  create: async (data: PerfilRequest) => normalizePerfil(await api.post(PERFIL_BASE, data)),
+  create: async (data: PerfilRequest) => normalizePerfil(await api.post(PERFIL_BASE, toPerfilPayload(data))),
 
   update: (id: string | number, data: PerfilRequest) =>
-    api.put(`${PERFIL_BASE}/${encodeURIComponent(String(id))}`, data).then((res) => normalizePerfil(res)),
+    api.put(`${PERFIL_BASE}/${encodeURIComponent(String(id))}`, toPerfilPayload(data)).then((res) => normalizePerfil(res)),
 
   delete: (id: string | number) => api.delete(`${PERFIL_BASE}/${encodeURIComponent(String(id))}`) as Promise<void>,
 }
 
 export const roleApi = {
   list: async (search = "", page = 0, size = 100): Promise<Page<RoleResponse>> => {
-    const perfis = await perfilApi.listAll()
-    let roles = extractRolesFromPerfis(perfis)
+    let roles = normalizeRolesList(await api.get(ROLE_BASE))
 
     const term = search.trim().toLowerCase()
     if (term) {
@@ -156,25 +166,27 @@ export const roleApi = {
     }
   },
 
-  listAll: async (): Promise<RoleResponse[]> => extractRolesFromPerfis(await perfilApi.listAll()),
+  listAll: async (): Promise<RoleResponse[]> => normalizeRolesList(await api.get(ROLE_BASE)),
 
   getById: async (id: string | number) => {
-    const roleId = Number(id)
-    const all = await roleApi.listAll()
-    const found = all.find((role) => role.id === roleId || role.nome === String(id))
-    if (!found) throw new Error("Role nao encontrada.")
-    return found
+    return normalizeRole(await api.get(`${ROLE_BASE}/${encodeURIComponent(String(id))}`))
   },
 
-  create: async (_data: RoleRequest) => {
-    throw new Error("Criacao de role nao disponivel neste endpoint. Use o fluxo de perfil.")
-  },
+  create: async (data: RoleRequest) =>
+    normalizeRole(
+      await api.post(ROLE_BASE, {
+        nome: data.nome,
+        ...(data.descricao != null ? { descricao: data.descricao } : {}),
+      }),
+    ),
 
-  update: async (_id: string | number, _data: RoleRequest) => {
-    throw new Error("Atualizacao de role nao disponivel neste endpoint. Use o fluxo de perfil.")
-  },
+  update: async (id: string | number, data: RoleRequest) =>
+    normalizeRole(
+      await api.put(`${ROLE_BASE}/${encodeURIComponent(String(id))}`, {
+        nome: data.nome,
+        ...(data.descricao != null ? { descricao: data.descricao } : {}),
+      }),
+    ),
 
-  delete: async (_id: string | number) => {
-    throw new Error("Exclusao de role nao disponivel neste endpoint. Use o fluxo de perfil.")
-  },
+  delete: async (id: string | number) => api.delete(`${ROLE_BASE}/${encodeURIComponent(String(id))}`),
 }
